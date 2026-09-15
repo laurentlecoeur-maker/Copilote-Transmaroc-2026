@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<title>Copilote TransMaroc V2</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f3f4f6;color:#111827}
+.app{max-width:760px;margin:auto;padding:14px}h1{font-size:25px;margin:0}.sub{color:#6b7280;margin:4px 0 14px}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px}
+button{min-height:50px;border:1px solid #9ca3af;border-radius:13px;background:white;font-size:15px;font-weight:800;padding:8px 10px}
+button:active{transform:scale(.98)}button.primary{background:#111827;color:white;border-color:#111827}
+.panel{background:white;border:1px solid #d1d5db;border-radius:17px;padding:13px;margin-bottom:11px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
+label{font-size:13px;font-weight:800;color:#374151}input{display:block;width:100%;margin-top:6px;min-height:52px;border:2px solid #9ca3af;border-radius:12px;background:white;padding:8px 10px;font-size:22px;font-weight:800;text-align:center}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:8px 5px;border-bottom:1px solid #e5e7eb;text-align:right}th:first-child,td:first-child{text-align:left}
+.badge{display:inline-block;border:1px solid #d1d5db;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:800}
+.big{font-size:clamp(3.2rem,15vw,6rem);font-weight:900;line-height:1;text-align:center}.center{text-align:center}.muted{color:#6b7280}.hidden{display:none}.danger{font-size:13px;color:#7f1d1d;margin-top:8px}
+.courseGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.courseValue{font-size:27px;font-weight:900;text-align:center}
+@media(max-width:430px){.tabs button{font-size:13px}.grid3{grid-template-columns:1fr 1fr}.app{padding:10px}}
+</style>
+</head>
+<body>
+<div class="app">
+<h1>Copilote TransMaroc V2</h1>
+<div class="sub">Prépare tes ZR avant le départ, puis passe en mode Course.</div>
+
+<div class="tabs">
+<button id="tPrep" class="primary">Préparation</button>
+<button id="tCourse">Course</button>
+<button id="tDelta">Delta libre</button>
+</div>
+
+<section id="prep">
+<div class="panel">
+<div class="grid">
+<label>Nom de la ZR<input id="zrName" value="ZR Entraînement"></label>
+<label>Heure de départ<input id="startTime" value="10:00:00" inputmode="numeric" maxlength="8"></label>
+</div>
+</div>
+
+<div class="panel">
+<strong>Ajouter un tronçon</strong>
+<div class="grid3" style="margin-top:10px">
+<label>Distance km<input id="segDist" inputmode="decimal" placeholder="2,40"></label>
+<label>Moyenne km/h<input id="segSpeed" inputmode="decimal" placeholder="40"></label>
+<label>Note<input id="segNote" placeholder="ex. changement"></label>
+</div>
+<button id="addSeg" class="primary" style="width:100%;margin-top:10px">+ Ajouter le tronçon</button>
+<div id="addMsg" class="danger"></div>
+</div>
+
+<div class="panel">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><strong>Table de la ZR</strong><span id="segCount" class="badge">0 tronçon</span></div>
+<div style="overflow-x:auto">
+<table><thead><tr><th>#</th><th>Distance</th><th>Cumul km</th><th>Moy.</th><th>Temps tronçon</th><th>Temps cible</th><th></th></tr></thead>
+<tbody id="segments"></tbody></table>
+</div>
+<div id="empty" class="muted center" style="padding:15px">Ajoute les tronçons du road-book.</div>
+</div>
+
+<div class="grid">
+<button id="loadDemo">Charger exemple</button>
+<button id="clearAll">Effacer ZR</button>
+</div>
+</section>
+
+<section id="course" class="hidden">
+<div class="panel center">
+<div class="muted" id="courseName">ZR</div>
+<div style="margin:6px 0 12px"><span class="badge">Point <span id="pointNo">1</span></span></div>
+<div class="courseGrid">
+<div><div class="muted">Distance cible</div><div id="targetDist" class="courseValue">—</div></div>
+<div><div class="muted">Temps cible</div><div id="targetTime" class="courseValue">—</div></div>
+</div>
+</div>
+<div class="panel center">
+<div class="muted">Temps réel au chrono</div>
+<input id="courseReal" inputmode="numeric" maxlength="8" placeholder="09:17" style="font-size:34px">
+<div id="courseDelta" class="big">—</div>
+<div id="courseStatus" style="font-size:19px;font-weight:900">Entre le temps réel</div>
+</div>
+<div class="grid">
+<button id="prevPoint">← Précédent</button>
+<button id="nextPoint" class="primary">Point suivant →</button>
+</div>
+<div class="grid" style="margin-top:9px">
+<button id="saveCourse">Enregistrer l'écart</button>
+<button id="resetCourse">Recommencer</button>
+</div>
+<div class="panel" style="margin-top:11px">
+<strong>Historique</strong><div id="courseHistory" class="muted" style="margin-top:7px">Aucun contrôle.</div>
+</div>
+</section>
+
+<section id="freeDelta" class="hidden">
+<div class="panel">
+<div class="grid">
+<label>Temps road-book<input id="freeRb" inputmode="numeric" maxlength="6" placeholder="07:30"></label>
+<label>Temps réel<input id="freeReal" inputmode="numeric" maxlength="6" placeholder="07:42"></label>
+</div>
+<div class="center" style="margin-top:15px"><div class="muted">Écart</div><div id="freeOut" class="big">—</div><div id="freeStatus" style="font-size:18px;font-weight:900">—</div></div>
+</div>
+</section>
+
+<div class="small muted center" style="font-size:11px;margin-top:12px">Outil d'entraînement. Vérifie toujours les règles et instruments officiels de l'épreuve.</div>
+</div>
+
+<script>
+let segs=[],coursePoint=1,courseHistory=[];
+
+const $=id=>document.getElementById(id);
+function num(v){return parseFloat(String(v).replace(",","."))}
+function parseTime(v){
+ v=String(v).trim();
+ let p=v.split(":");
+ if(p.length===2){let m=Number(p[0]),s=Number(p[1]);return Number.isFinite(m)&&Number.isFinite(s)&&s<60?m*60+s:null}
+ if(p.length===3){let h=Number(p[0]),m=Number(p[1]),s=Number(p[2]);return Number.isFinite(h)&&Number.isFinite(m)&&Number.isFinite(s)&&m<60&&s<60?h*3600+m*60+s:null}
+ return null;
+}
+function fmt(sec){
+ sec=Math.max(0,Math.round(sec));let h=Math.floor(sec/3600);sec%=3600;let m=Math.floor(sec/60),s=sec%60;
+ return (h?String(h).padStart(2,"0")+":":"")+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+}
+function fmtShort(sec){
+ sec=Math.max(0,Math.round(sec));let m=Math.floor(sec/60),s=sec%60;return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+}
+function deltaFmt(d){let sign=d>0?"+":d<0?"−":"±";let a=Math.abs(Math.round(d));return sign+String(Math.floor(a/60)).padStart(2,"0")+":"+String(a%60).padStart(2,"0")}
+function normalizeTime(e){
+ let v=e.target.value.replace(/\D/g,"").slice(0,6);
+ if(v.length<=4){if(v.length>2)v=v.slice(0,-2)+":"+v.slice(-2)}
+ else{v=v.slice(0,-4)+":"+v.slice(-4,-2)+":"+v.slice(-2)}
+ e.target.value=v;
+}
+function calcRows(){
+ let cumDist=0,cumTime=0;
+ return segs.map((x,i)=>{
+  let d=x.d,s=x.s,t=d/s*3600;cumDist+=d;cumTime+=t;
+  return {...x,i:i+1,cumDist,cumTime,t};
+ });
+}
+function render(){
+ let rows=calcRows();
+ $("segments").innerHTML=rows.map((r,i)=>`<tr><td>${r.i}</td><td>${r.d.toFixed(2)}</td><td>${r.cumDist.toFixed(2)}</td><td>${r.s}</td><td>${fmtShort(r.t)}</td><td>${fmt(r.cumTime)}</td><td><button data-del="${i}" style="min-height:34px;padding:3px 8px;font-size:12px">×</button></td></tr>`).join("");
+ $("empty").style.display=rows.length?"none":"block";
+ $("segCount").textContent=rows.length+" tronçon"+(rows.length===1?"":"s");
+ document.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",()=>{segs.splice(Number(b.dataset.del),1);coursePoint=Math.min(coursePoint,segs.length||1);render();renderCourse()}));
+}
+$("addSeg").onclick=()=>{
+ let d=num($("segDist").value),s=num($("segSpeed").value),note=$("segNote").value.trim();
+ if(!Number.isFinite(d)||d<=0||!Number.isFinite(s)||s<=0){$("addMsg").textContent="Distance et moyenne doivent être valides.";return}
+ segs.push({d,s,note});$("segDist").value="";$("segSpeed").value="";$("segNote").value="";$("addMsg").textContent="";render();
+};
+$("loadDemo").onclick=()=>{segs=[{d:2.4,s:40,note:""},{d:3.2,s:35,note:"Moyenne 35"},{d:1.8,s:42,note:""},{d:4.5,s:38,note:"Moyenne 38"}];render()};
+$("clearAll").onclick=()=>{segs=[];coursePoint=1;courseHistory=[];render();renderCourse();renderHistory()};
+
+function renderCourse(){
+ let rows=calcRows(),r=rows[coursePoint-1];
+ $("courseName").textContent=$("zrName").value||"ZR";
+ $("pointNo").textContent=rows.length?coursePoint:0;
+ $("targetDist").textContent=r?r.cumDist.toFixed(2)+" km":"—";
+ $("targetTime").textContent=r?fmt(r.cumTime):"—";
+ if(!r){$("courseReal").value="";$("courseDelta").textContent="—";$("courseStatus").textContent="Prépare d'abord la ZR";return}
+ calcCourseDelta();
+}
+function calcCourseDelta(){
+ let rows=calcRows(),r=rows[coursePoint-1],real=parseTime($("courseReal").value);
+ if(!r||real===null){$("courseDelta").textContent="—";$("courseStatus").textContent="Entre le temps réel";return}
+ let d=real-r.cumTime;$("courseDelta").textContent=deltaFmt(d);$("courseStatus").textContent=d>0?"RETARD":d<0?"AVANCE":"À L’HEURE";
+}
+function renderHistory(){
+ $("courseHistory").innerHTML=courseHistory.length?courseHistory.slice().reverse().map((x,i)=>`<div style="padding:6px 0;border-bottom:1px solid #e5e7eb">Point ${x.point} · cible ${fmt(x.target)} · réel ${fmt(x.real)} · <strong>${deltaFmt(x.delta)}</strong></div>`).join(""):"Aucun contrôle.";
+}
+$("courseReal").addEventListener("input",e=>{normalizeTime(e);calcCourseDelta()});
+$("saveCourse").onclick=()=>{
+ let rows=calcRows(),r=rows[coursePoint-1],real=parseTime($("courseReal").value);if(!r||real===null)return;
+ courseHistory.push({point:coursePoint,target:r.cumTime,real,delta:real-r.cumTime});renderHistory();
+};
+$("nextPoint").onclick=()=>{if(coursePoint<segs.length){coursePoint++;$("courseReal").value="";renderCourse();$("courseReal").focus()}};
+$("prevPoint").onclick=()=>{if(coursePoint>1){coursePoint--;$("courseReal").value="";renderCourse();$("courseReal").focus()}};
+$("resetCourse").onclick=()=>{coursePoint=1;courseHistory=[];$("courseReal").value="";renderCourse();renderHistory()};
+
+function calcFree(){
+ let a=parseTime($("freeRb").value),b=parseTime($("freeReal").value);
+ if(a===null||b===null){$("freeOut").textContent="—";$("freeStatus").textContent="—";return}
+ let d=b-a;$("freeOut").textContent=deltaFmt(d);$("freeStatus").textContent=d>0?"RETARD":d<0?"AVANCE":"À L’HEURE";
+}
+$("freeRb").addEventListener("input",e=>{normalizeTime(e);calcFree()});
+$("freeReal").addEventListener("input",e=>{normalizeTime(e);calcFree()});
+
+function tab(name){
+ $("prep").classList.toggle("hidden",name!=="prep");
+ $("course").classList.toggle("hidden",name!=="course");
+ $("freeDelta").classList.toggle("hidden",name!=="free");
+ $("tPrep").classList.toggle("primary",name==="prep");$("tCourse").classList.toggle("primary",name==="course");$("tDelta").classList.toggle("primary",name==="free");
+ if(name==="course"){renderCourse();$("courseReal").focus()}
+}
+$("tPrep").onclick=()=>tab("prep");$("tCourse").onclick=()=>tab("course");$("tDelta").onclick=()=>tab("free");
+$("startTime").addEventListener("input",normalizeTime);
+render();renderCourse();
+</script>
+</body>
+</html>
