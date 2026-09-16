@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#111827">
-<title>Copilote TransMaroc V15</title>
+<title>Copilote TransMaroc V16</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,sans-serif;background:#f3f4f6;color:#111827}
@@ -44,9 +44,14 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px
 <section id="prep">
 <div class="panel">
 <div class="grid">
-<label>Journée<input id="dayName" value="Jour 1"></label>
+<label>Journée<select id="daySelect"></select></label>
 <label>ZR active<select id="zrSelect"></select></label>
 </div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+<button id="addDay" class="primary" type="button">+ Nouvelle journée</button>
+<button id="renameDay" type="button">✏️ Renommer la journée</button>
+</div>
+<div id="dayMsg" class="center muted" style="margin-top:8px"></div>
 </div>
 
 <div class="panel">
@@ -156,6 +161,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px
 
 var KEY="transmaroc_v8_data";
 var zrs=[],activeZr=0,coursePoint=1,realDigits="",timerRunning=false,timerStart=0,timerElapsed=0,timerInterval=null;
+var days=[],activeDay=0;
 
 function $(id){return document.getElementById(id)}
 function num(v){return parseFloat(String(v).replace(",", "."))}
@@ -164,9 +170,70 @@ function short(sec){sec=Math.max(0,Math.round(sec));return String(Math.floor(sec
 function deltaFmt(d){var sign=d>0?"+":d<0?"−":"±",a=Math.abs(Math.round(d));return sign+String(Math.floor(a/60)).padStart(2,"0")+":"+String(a%60).padStart(2,"0")}
 function rows(z){var cd=0,ct=0;return (z&&z.segs||[]).map(function(x,i){var t=x.d/x.s*3600;cd+=x.d;ct+=t;return {i:i+1,d:x.d,s:x.s,note:x.note||"",t:t,cd:cd,ct:ct}})}
 function current(){return zrs[activeZr]||null}
-function save(){try{localStorage.setItem(KEY,JSON.stringify({zrs:zrs,activeZr:activeZr,coursePoint:coursePoint,dayName:$("dayName").value}))}catch(e){}}
-function load(){try{var x=JSON.parse(localStorage.getItem(KEY)||"null");if(x&&Array.isArray(x.zrs)){zrs=x.zrs;activeZr=x.activeZr||0;coursePoint=x.coursePoint||1;if($("dayName"))$("dayName").value=x.dayName||"Jour 1"}}catch(e){}}
 
+function syncCurrentDay(){
+  if(!days.length)days=[{id:"day_1",name:"Jour 1",zrs:zrs}];
+  days[activeDay].zrs=zrs;
+}
+function save(){
+  try{
+    syncCurrentDay();
+    localStorage.setItem(KEY,JSON.stringify({version:17,days:days,activeDay:activeDay}));
+  }catch(e){}
+}
+function uniqueDayName(base){
+  var n=1,name=base||"Jour 1",used={};
+  days.forEach(function(d){used[String(d.name).toLowerCase()]=true});
+  while(used[name.toLowerCase()]){n++;name=(base||"Jour")+" "+n}
+  return name;
+}
+function switchDay(i){
+  i=Number(i);
+  if(!days[i])return;
+  if(timerRunning){
+    timerRunning=false;
+    if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
+  }
+  syncCurrentDay();
+  activeDay=i;
+  zrs=days[i].zrs||[];
+  activeZr=Math.min(activeZr,Math.max(zrs.length-1,0));
+  if(!zrs.length)activeZr=0;
+  coursePoint=1;realDigits="";timerElapsed=0;
+  save();renderAll();
+}
+function load(){
+  try{
+    var x=JSON.parse(localStorage.getItem(KEY)||"null");
+    if(x&&Array.isArray(x.days)){
+      days=x.days;
+      activeDay=Math.min(Math.max(Number(x.activeDay)||0,0),Math.max(days.length-1,0));
+      days.forEach(function(d,di){
+        if(!d.id)d.id="day_"+Date.now()+"_"+di+"_"+Math.random().toString(36).slice(2);
+        if(!Array.isArray(d.zrs))d.zrs=[];
+        d.zrs.forEach(function(z,i){if(!z.id)z.id="zr_"+Date.now()+"_"+di+"_"+i+"_"+Math.random().toString(36).slice(2)});
+      });
+      zrs=days[activeDay].zrs||[];
+      return;
+    }
+    /* Migration des anciennes versions : la ZR existante devient la Journée 1. */
+    if(x&&Array.isArray(x.zrs)){
+      zrs=x.zrs;
+      zrs.forEach(function(z,i){if(!z.id)z.id="zr_"+Date.now()+"_"+i+"_"+Math.random().toString(36).slice(2)});
+      days=[{id:"day_1",name:x.dayName||"Jour 1",zrs:zrs}];
+      activeDay=0; activeZr=Math.min(Math.max(Number(x.activeZr)||0,0),Math.max(zrs.length-1,0));
+      return;
+    }
+  }catch(e){}
+  days=[{id:"day_1",name:"Jour 1",zrs:[]}];
+  activeDay=0;zrs=days[0].zrs;activeZr=0;
+}
+function renderDays(){
+  var sel=$("daySelect");
+  if(!sel)return;
+  sel.innerHTML=days.map(function(d,i){return '<option value="'+i+'">'+escapeHtml(d.name)+'</option>'}).join("");
+  if(days.length)sel.value=String(activeDay);
+}
 function renderSelectors(){
 $("zrSelect").innerHTML=zrs.map(function(z,i){return '<option value="'+i+'">'+escapeHtml(z.name)+'</option>'}).join("");
 $("courseZr").innerHTML=zrs.map(function(z,i){return '<option value="'+i+'">'+escapeHtml(z.name)+'</option>'}).join("");
@@ -187,9 +254,11 @@ function renderList(){
 var container=$("zrList");
 if(!zrs.length){container.innerHTML='<div class="muted">Aucune ZR créée.</div>';return}
 container.innerHTML=zrs.map(function(z,i){
-var rs=rows(z),d=rs.length?rs[rs.length-1].cd:0,t=rs.length?rs[rs.length-1].ct:0;
-return '<div class="zrItem"><div class="zrInfo"><strong>'+escapeHtml(z.name)+'</strong><span>'+escapeHtml(z.start)+' · '+rs.length+' tronçon(s) · '+d.toFixed(2)+' km · '+fmt(t)+'</span></div><div style="display:flex;gap:7px;flex-wrap:wrap"><button type="button" data-select-zr="'+i+'">'+(i===activeZr?"Active":"Sélectionner")+'</button><button type="button" onclick="deleteZR('+i+')" style="background:#fee2e2;border-color:#ef4444">🗑️ Supprimer</button></div></div>'
+  if(!z.id) z.id="zr_"+Date.now()+"_"+i+"_"+Math.random().toString(36).slice(2);
+  var rs=rows(z),d=rs.length?rs[rs.length-1].cd:0,t=rs.length?rs[rs.length-1].ct:0;
+  return '<div class="zrItem"><div class="zrInfo"><strong>'+escapeHtml(z.name)+'</strong><span>'+escapeHtml(z.start)+' · '+rs.length+' tronçon(s) · '+d.toFixed(2)+' km · '+fmt(t)+'</span></div><div style="display:flex;gap:7px;flex-wrap:wrap"><button type="button" data-select-zr-id="'+z.id+'">'+(i===activeZr?"Active":"Sélectionner")+'</button><button type="button" data-delete-zr-id="'+z.id+'" style="background:#fee2e2;border-color:#ef4444">🗑️ Supprimer</button></div></div>'
 }).join("");
+save();
 }
 function renderCourse(){
 var idx=Number($("courseZr").value),z=zrs[idx],rs=rows(z),r=rs[coursePoint-1];
@@ -280,17 +349,61 @@ z.history.push({point:coursePoint,target:r.t,real:Math.round(real),delta:Math.ro
 save();renderHistory();
 }
 function renderHistory(){var z=zrs[Number($("courseZr").value)],h=z&&z.history||[];$("courseHistory").innerHTML=h.length?h.slice().reverse().map(function(x){return '<div style="padding:7px 0;border-bottom:1px solid #e5e7eb">Tronçon '+x.point+' · cible '+fmt(x.target)+' · réel '+fmt(x.real)+' · <strong>'+deltaFmt(x.delta)+'</strong></div>'}).join(""):"Aucun contrôle."}
-function renderAll(){renderSelectors();renderTable();renderList();renderCourse()}
+function renderAll(){renderDays();renderSelectors();renderTable();renderList();renderCourse()}
 function tab(name){$("prep").classList.toggle("hidden",name!=="prep");$("course").classList.toggle("hidden",name!=="course");$("delta").classList.toggle("hidden",name!=="delta");$("tabPrep").classList.toggle("primary",name==="prep");$("tabCourse").classList.toggle("primary",name==="course");$("tabDelta").classList.toggle("primary",name==="delta");if(name==="course")renderCourse()}
 
+$("daySelect").addEventListener("change",function(){switchDay(this.value)});
+$("addDay").addEventListener("click",function(){
+  var base=prompt("Nom de la nouvelle journée :", "Jour "+(days.length+1));
+  if(base===null)return;
+  base=base.trim()||("Jour "+(days.length+1));
+  var name=uniqueDayName(base);
+  syncCurrentDay();
+  days.push({id:"day_"+Date.now()+"_"+Math.random().toString(36).slice(2),name:name,zrs:[]});
+  activeDay=days.length-1;zrs=days[activeDay].zrs;activeZr=0;coursePoint=1;
+  save();renderAll();
+});
+$("renameDay").addEventListener("click",function(){
+  if(!days[activeDay])return;
+  var name=prompt("Nouveau nom de la journée :",days[activeDay].name);
+  if(name===null)return;
+  name=name.trim();if(!name)return;
+  if(days.some(function(d,i){return i!==activeDay&&String(d.name).toLowerCase()===name.toLowerCase()})){
+    $("dayMsg").textContent="Ce nom de journée existe déjà.";return;
+  }
+  days[activeDay].name=name;save();renderAll();
+});
 $("addZr").addEventListener("click",function(){
-var name=$("newZrName").value.trim()||("ZR "+(zrs.length+1)),start=$("newZrStart").value.trim()||"10:00:00";
-zrs.push({name:name,start:start,segs:[],history:[]});activeZr=zrs.length-1;coursePoint=1;
+var rawName=$("newZrName").value.trim();
+var start=$("newZrStart").value.trim()||"10:00:00";
+var match=rawName.match(/^ZR\s*(\d+)$/i);
+var name=rawName||("ZR "+(zrs.length+1));
+
+if(match){
+  var number=String(Number(match[1]));
+  var exists=zrs.some(function(z){
+    var m=String(z.name).trim().match(/^ZR\s*(\d+)$/i);
+    return m && String(Number(m[1]))===number;
+  });
+  if(exists){
+    $("zrMsg").textContent="⚠️ La ZR "+number+" existe déjà. Choisis un autre numéro.";
+    $("newZrName").focus();
+    return;
+  }
+  name="ZR "+number;
+}
+zrs.push({id:"zr_"+Date.now()+"_"+Math.random().toString(36).slice(2),name:name,start:start,segs:[],history:[]});
+activeZr=zrs.length-1;
+coursePoint=1;
 $("zrMsg").textContent="✓ "+name+" créée";
-$("newZrName").value="ZR "+(zrs.length+1);
+var n=1;
+while(zrs.some(function(z){
+  var m=String(z.name).trim().match(/^ZR\s*(\d+)$/i);
+  return m && Number(m[1])===n;
+})) n++;
+$("newZrName").value="ZR "+n;
 save();renderAll();
 });
-
 $("addSeg").addEventListener("click",function(){
 var z=current(),d=num($("segDist").value),s=num($("segSpeed").value),note=$("segNote").value.trim();
 if(!z){$("segMsg").textContent="Crée d'abord une ZR.";return}
@@ -378,31 +491,54 @@ $("freeRb").addEventListener("input",freeCalc);$("freeReal").addEventListener("i
 
 $("zrList").addEventListener("click",function(ev){
   var btn=ev.target.closest("button");
-  if(!btn || !this.contains(btn)) return;
-  if(btn.hasAttribute("data-select-zr")){
-    activeZr=Number(btn.getAttribute("data-select-zr"));
-    coursePoint=1; timerElapsed=0; realDigits="";
-    save(); renderAll(); return;
+  if(!btn)return;
+
+  if(btn.hasAttribute("data-select-zr-id")){
+    var sid=btn.getAttribute("data-select-zr-id");
+    var si=zrs.findIndex(function(z){return z.id===sid});
+    if(si<0)return;
+    activeZr=si;coursePoint=1;timerElapsed=0;realDigits="";
+    save();renderAll();return;
   }
-  if(btn.hasAttribute("data-delete-zr")){
-    var i=Number(btn.getAttribute("data-delete-zr"));
-    if(!Number.isInteger(i) || !zrs[i]) return;
-    var name=zrs[i].name;
-    if(!window.confirm("Supprimer "+name+" et tous ses tronçons ?")) return;
+
+  if(btn.hasAttribute("data-delete-zr-id")){
+    var did=btn.getAttribute("data-delete-zr-id");
+    var di=zrs.findIndex(function(z){return z.id===did});
+    if(di<0)return;
+
+    var deletedName=zrs[di].name;
     if(timerRunning){
       timerRunning=false;
       if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
     }
-    zrs.splice(i,1);
-    if(!zrs.length){activeZr=0;coursePoint=1;}
-    else if(activeZr>i){activeZr--;}
-    else if(activeZr===i){activeZr=Math.min(i,zrs.length-1);}
-    coursePoint=1; realDigits=""; timerElapsed=0;
-    save(); renderAll();
+
+    zrs.splice(di,1);
+    if(!zrs.length) activeZr=0;
+    else if(activeZr>di) activeZr--;
+    else if(activeZr===di) activeZr=Math.min(di,zrs.length-1);
+
+    coursePoint=1;realDigits="";timerElapsed=0;
+    save();renderAll();
     var msg=document.getElementById("zrMsg");
-    if(msg)msg.textContent="✓ "+name+" supprimée";
+    if(msg)msg.textContent="✓ "+deletedName+" supprimée";
   }
 });
+/* Répare automatiquement les anciens doublons de numéros ZR présents dans le stockage local. */
+(function repairDuplicateZRNumbers(){
+  days.forEach(function(day){
+    var used={},next=1;
+    (day.zrs||[]).forEach(function(z){
+      var m=String(z.name||"").trim().match(/^ZR\s*(\d+)$/i);
+      if(!m)return;
+      var n=Number(m[1]);
+      if(!used[n]){used[n]=true;return;}
+      while(used[next])next++;
+      z.name="ZR "+next;used[next]=true;
+    });
+  });
+  zrs=days[activeDay].zrs||[];
+  save();
+})();;
 load();renderAll();
 })();
 </script>
