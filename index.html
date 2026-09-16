@@ -1,11 +1,10 @@
-<!-- TransMaroc 2026 -->
 <!doctype html>
 <html lang="fr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#111827">
-<title>Copilote TransMaroc V4</title>
+<title>Copilote TransMaroc V7 corrigée</title>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f3f4f6;color:#111827}
 .statusLight{width:150px;height:150px;border-radius:50%;margin:14px auto 12px;border:8px solid #9ca3af;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900}
@@ -252,9 +251,6 @@ $("saveCourse").onclick=()=>{
  if(!z||!r||realDigits.length!==4)return;
  const m=Number(realDigits.slice(0,2)),s=Number(realDigits.slice(2,4)); if(s>59)return;
  const real=m*60+s; z.history.push({point:coursePoint,target:r.ct,real,delta:real-r.ct}); renderCourseHistory();
-};
- if(!z||!r||real===null)return;
- z.history.push({point:coursePoint,target:r.ct,real,delta:real-r.ct});renderCourseHistory();
 };
 $("nextPoint").onclick=()=>{let z=zrs[Number($("courseZr").value)||0];if(z&&coursePoint<z.segs.length){coursePoint++;realDigits="";updateRealDisplay();renderCourse()}};
 $("prevPoint").onclick=()=>{if(coursePoint>1){coursePoint--;realDigits="";updateRealDisplay();renderCourse()}};
