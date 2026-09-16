@@ -2,278 +2,238 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#111827">
-<title>Copilote TransMaroc V7 corrigée</title>
+<title>Copilote TransMaroc V8</title>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f3f4f6;color:#111827}
-.statusLight{width:150px;height:150px;border-radius:50%;margin:14px auto 12px;border:8px solid #9ca3af;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900}
-.statusLight.green{background:#22c55e;border-color:#166534;color:#fff}
-.statusLight.orange{background:#f59e0b;border-color:#92400e;color:#fff}
-.statusLight.red{background:#ef4444;border-color:#991b1b;color:#fff}
-.statusLight.neutral{background:#e5e7eb;border-color:#9ca3af;color:#374151}
-.app{max-width:950px;margin:auto;padding:14px}h1{font-size:25px;margin:0}.sub{color:#6b7280;margin:4px 0 14px}
-.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px}
-button{min-height:50px;border:1px solid #9ca3af;border-radius:13px;background:#fff;font-size:15px;font-weight:800;padding:8px 10px}
-button.primary{background:#111827;color:#fff;border-color:#111827}.panel{background:#fff;border:1px solid #d1d5db;border-radius:17px;padding:13px;margin-bottom:11px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
-label{font-size:13px;font-weight:800;color:#374151}input{display:block;width:100%;margin-top:6px;min-height:52px;border:2px solid #9ca3af;border-radius:12px;background:#fff;padding:8px 10px;font-size:21px;font-weight:800;text-align:center}
-select{width:100%;min-height:52px;border:2px solid #9ca3af;border-radius:12px;background:#fff;padding:8px 10px;font-size:18px;font-weight:800}
-.tableWrap{overflow-x:auto;border:1px solid #e5e7eb;border-radius:12px}table{width:100%;border-collapse:collapse;font-size:13px;min-width:720px}
-th,td{padding:9px 6px;border-bottom:1px solid #e5e7eb;text-align:right;white-space:nowrap}th:first-child,td:first-child{text-align:center}th:nth-child(7),td:nth-child(7){text-align:left}
-.badge{display:inline-block;border:1px solid #d1d5db;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:800}
-.center{text-align:center}.muted{color:#6b7280}.hidden{display:none}.big{font-size:clamp(3.2rem,15vw,6rem);font-weight:900;line-height:1;text-align:center}
-.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:11px}.summaryBox{background:#fff;border:1px solid #d1d5db;border-radius:14px;padding:10px;text-align:center}.summaryBox strong{display:block;font-size:20px}
-.courseGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.courseValue{font-size:27px;font-weight:900;text-align:center}
-.zrList{display:grid;gap:8px}.zrItem{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;border:1px solid #d1d5db;border-radius:13px;padding:10px;background:#fff}.zrInfo strong{display:block}.zrInfo span{font-size:12px;color:#6b7280}
-@media(max-width:520px){.grid3{grid-template-columns:1fr 1fr}.summary{grid-template-columns:1fr 1fr}.tabs button{font-size:13px}.app{padding:10px}}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f3f4f6;color:#111827}
+.app{max-width:980px;margin:auto;padding:14px}
+h1{font-size:27px;margin:0}.sub{color:#6b7280;margin:4px 0 14px}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+button{min-height:52px;border:1px solid #9ca3af;border-radius:13px;background:#fff;font-size:16px;font-weight:800;padding:9px 12px;touch-action:manipulation}
+button.primary{background:#111827;color:#fff;border-color:#111827}
+.panel{background:#fff;border:1px solid #d1d5db;border-radius:17px;padding:14px;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+label{font-size:13px;font-weight:800;color:#374151}
+input,select{display:block;width:100%;margin-top:6px;min-height:58px;border:2px solid #9ca3af;border-radius:13px;background:#fff;padding:8px 12px;font-size:22px;font-weight:800;text-align:center}
+.muted{color:#6b7280}.center{text-align:center}.hidden{display:none!important}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.stat{background:#fff;border:1px solid #d1d5db;border-radius:14px;padding:10px;text-align:center;color:#6b7280}.stat strong{display:block;color:#111827;font-size:20px;margin-top:3px}
+.zrItem{display:flex;justify-content:space-between;align-items:center;gap:10px;border-top:1px solid #e5e7eb;padding:10px 0}.zrInfo strong{display:block;font-size:17px}.zrInfo span{color:#6b7280;font-size:13px}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px solid #e5e7eb;padding:7px;text-align:center}th{background:#f9fafb}
+.courseTop{display:grid;grid-template-columns:1fr 1fr;gap:10px}.bigbox{background:#f9fafb;border:1px solid #d1d5db;border-radius:15px;padding:12px;text-align:center}.bigbox .value{font-size:29px;font-weight:900;margin-top:4px}
+.statusLight{width:150px;height:150px;border-radius:50%;margin:12px auto;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;border:8px solid #d1d5db;background:#e5e7eb;color:#374151}.green{background:#22c55e;border-color:#166534;color:#fff}.orange{background:#f59e0b;border-color:#92400e;color:#fff}.red{background:#ef4444;border-color:#991b1b;color:#fff}.neutral{background:#e5e7eb;border-color:#9ca3af;color:#374151}
+.delta{font-size:42px;font-weight:900;text-align:center}.courseStatus{text-align:center;font-size:19px;font-weight:900}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:520px;margin:14px auto}.key{min-height:82px;font-size:30px;border-width:2px}.key.action{font-size:20px}
+.courseActions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media(max-width:650px){.grid,.grid3,.courseTop,.stats{grid-template-columns:1fr}.tabs{grid-template-columns:1fr 1fr 1fr}.key{min-height:76px}.app{padding:9px}}
 </style>
 </head>
 <body>
 <div class="app">
-<h1>Copilote TransMaroc V4</h1>
+<h1>Copilote TransMaroc V8</h1>
 <div class="sub">Plusieurs ZR par journée · préparation complète puis mode Course.</div>
 
 <div class="tabs">
-<button id="tPrep" class="primary">Journée / ZR</button>
-<button id="tCourse">Course</button>
-<button id="tDelta">Delta libre</button>
+<button id="tabPrep" class="primary" type="button">Journée / ZR</button>
+<button id="tabCourse" type="button">Course</button>
+<button id="tabDelta" type="button">Delta libre</button>
 </div>
 
 <section id="prep">
 <div class="panel">
 <div class="grid">
 <label>Journée<input id="dayName" value="Jour 1"></label>
-<label>ZR active
-<select id="zrSelect"></select>
-</label>
+<label>ZR active<select id="zrSelect"></select></label>
 </div>
 </div>
 
 <div class="panel">
-<strong>Créer une nouvelle ZR</strong>
-<div class="grid" style="margin-top:10px">
-<label>Nom de la ZR<input id="newZrName" placeholder="ZR 1"></label>
-<label>Heure de départ<input id="newZrStart" value="10:00:00" inputmode="numeric" maxlength="8"></label>
+<h2>Créer une nouvelle ZR</h2>
+<div class="grid">
+<label>Nom de la ZR<input id="newZrName" value="ZR 1"></label>
+<label>Heure de départ<input id="newZrStart" value="10:00:00"></label>
 </div>
-<button id="addZr" class="primary" style="width:100%;margin-top:10px">+ Créer la ZR</button>
+<button id="addZr" class="primary" type="button">+ Créer la ZR</button>
+<div id="zrMsg" class="center muted" style="margin-top:8px"></div>
 </div>
 
 <div class="panel">
-<strong>Ajouter un tronçon à la ZR active</strong>
-<div class="grid3" style="margin-top:10px">
-<label>Distance du tronçon (km)<input id="segDist" inputmode="decimal" placeholder="2,40"></label>
-<label>Moyenne (km/h)<input id="segSpeed" inputmode="decimal" placeholder="40"></label>
+<h2>Ajouter un tronçon à la ZR active</h2>
+<div class="grid3">
+<label>Distance (km)<input id="segDist" inputmode="decimal" value="2,40"></label>
+<label>Moyenne (km/h)<input id="segSpeed" inputmode="decimal" value="40"></label>
 <label>Note<input id="segNote" placeholder="ex. changement"></label>
 </div>
-<button id="addSeg" class="primary" style="width:100%;margin-top:10px">+ Ajouter le tronçon</button>
-<div id="msg" style="font-size:13px;color:#991b1b;margin-top:7px"></div>
+<button id="addSeg" class="primary" type="button">+ Ajouter le tronçon</button>
+<div id="segMsg" class="center muted" style="margin-top:8px"></div>
 </div>
 
-<div class="summary">
-<div class="summaryBox"><span class="muted">Tronçons</span><strong id="sumSeg">0</strong></div>
-<div class="summaryBox"><span class="muted">Distance</span><strong id="sumDist">0,00 km</strong></div>
-<div class="summaryBox"><span class="muted">Temps ZR</span><strong id="sumTime">00:00:00</strong></div>
-</div>
-
-<div class="panel">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px">
-<strong id="activeTitle">ZR active</strong><span id="segCount" class="badge">0 tronçon</span>
-</div>
-<div class="tableWrap"><table>
-<thead><tr><th>#</th><th>Distance</th><th>Cumul</th><th>Moyenne</th><th>Temps tronçon</th><th>Temps cible</th><th>Note</th><th>Action</th></tr></thead>
-<tbody id="segments"></tbody></table></div>
-<div id="empty" class="muted center" style="padding:15px">Aucun tronçon dans cette ZR.</div>
+<div class="stats">
+<div class="stat">Tronçons<strong id="sumSeg">0</strong></div>
+<div class="stat">Distance<strong id="sumDist">0,00 km</strong></div>
+<div class="stat">Temps ZR<strong id="sumTime">00:00:00</strong></div>
 </div>
 
 <div class="panel">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><strong>Les ZR de la journée</strong><span id="zrCount" class="badge">0 ZR</span></div>
-<div id="zrList" class="zrList"></div>
+<h2>Tronçons de la ZR active</h2>
+<div id="empty" class="muted center">Aucun tronçon.</div>
+<div style="overflow:auto"><table id="segTable" class="hidden"><thead><tr><th>#</th><th>Distance</th><th>Cumul</th><th>Moy.</th><th>Temps</th><th>Cible</th><th>Note</th><th></th></tr></thead><tbody id="segBody"></tbody></table></div>
 </div>
 
-<div class="grid">
-<button id="loadDemo">Charger une journée exemple</button>
-<button id="clearDay">Effacer la journée</button>
+<div class="panel">
+<h2>Mes ZR</h2>
+<div id="zrList"></div>
+<button id="demo" type="button">Charger un exemple</button>
+<button id="clearDay" type="button" style="margin-top:8px">Effacer la journée</button>
 </div>
 </section>
 
 <section id="course" class="hidden">
 <div class="panel">
-<label>ZR à courir
-<select id="courseZr"></select>
-</label>
+<label>ZR en course<select id="courseZr"></select></label>
+<div class="courseTop" style="margin-top:10px">
+<div class="bigbox">Tronçon<strong class="value" id="pointNo">0</strong></div>
+<div class="bigbox">Distance cible<strong class="value" id="targetDist">—</strong></div>
 </div>
-<div class="panel center">
-<div class="muted" id="courseName">ZR</div>
-<div style="margin:6px 0 12px"><span class="badge">Tronçon <span id="pointNo">1</span></span></div>
-<div class="courseGrid">
-<div><div class="muted">Distance cible</div><div id="targetDist" class="courseValue">—</div></div>
-<div><div class="muted">Temps cible</div><div id="targetTime" class="courseValue">—</div></div>
-</div>
-<div id="courseNote" class="muted" style="margin-top:8px"></div>
-</div>
-<div class="panel center">
-<div class="muted">Temps réel au chrono</div>
-<div id="realDisplay" style="font-size:46px;font-weight:900;letter-spacing:.08em;border:2px solid #9ca3af;border-radius:14px;padding:10px;margin:10px 0;background:#fff">--:--</div>
-<div id="keypad" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:430px;margin:0 auto">
-<button data-key="1">1</button><button data-key="2">2</button><button data-key="3">3</button>
-<button data-key="4">4</button><button data-key="5">5</button><button data-key="6">6</button>
-<button data-key="7">7</button><button data-key="8">8</button><button data-key="9">9</button>
-<button data-key="C">C</button><button data-key="0">0</button><button data-key="B">⌫</button>
-</div>
+<div class="bigbox" style="margin-top:10px">Temps cible cumulé<strong class="value" id="targetTime">—</strong></div>
+<div id="courseNote" class="center muted" style="margin:9px 0"></div>
 <div id="statusLight" class="statusLight neutral">—</div>
-<div id="courseDelta" class="big">—</div><div class="muted" style="font-size:12px;margin-top:8px">Vert ≤ 5 s · Orange 6–15 s · Rouge &gt; 15 s</div>
-<div id="courseStatus" style="font-size:19px;font-weight:900">Entre le temps réel</div>
+<div id="courseDelta" class="delta">—</div>
+<div id="courseStatus" class="courseStatus">Saisis MMSS</div>
 </div>
-<div class="grid"><button id="prevPoint">← Précédent</button><button id="nextPoint" class="primary">Tronçon suivant →</button></div>
-<div class="grid" style="margin-top:9px"><button id="saveCourse">Enregistrer l'écart</button><button id="resetCourse">Recommencer ZR</button></div>
-<div class="panel" style="margin-top:11px"><strong>Historique de la ZR</strong><div id="courseHistory" class="muted" style="margin-top:7px">Aucun contrôle.</div></div>
+
+<div class="panel">
+<div class="bigbox"><div class="muted">Temps réel</div><div id="realDisplay" class="value">--:--</div></div>
+<div class="keypad">
+<button class="key" type="button" data-key="1">1</button><button class="key" type="button" data-key="2">2</button><button class="key" type="button" data-key="3">3</button>
+<button class="key" type="button" data-key="4">4</button><button class="key" type="button" data-key="5">5</button><button class="key" type="button" data-key="6">6</button>
+<button class="key" type="button" data-key="7">7</button><button class="key" type="button" data-key="8">8</button><button class="key" type="button" data-key="9">9</button>
+<button class="key action" type="button" data-key="C">EFFACER</button><button class="key" type="button" data-key="0">0</button><button class="key action" type="button" data-key="B">⌫</button>
+</div>
+<div class="courseActions">
+<button id="saveCourse" class="primary" type="button">ENREGISTRER</button>
+<button id="nextPoint" class="primary" type="button">SUIVANT ▶</button>
+</div>
+<div class="three" style="margin-top:10px"><button id="prevPoint" type="button">◀ PRÉC.</button><button id="resetCourse" type="button">RAZ</button><button id="courseToPrep" type="button">PRÉPA</button></div>
+</div>
+
+<div class="panel"><h2>Historique</h2><div id="courseHistory" class="muted">Aucun contrôle.</div></div>
 </section>
 
-<section id="freeDelta" class="hidden">
-<div class="panel"><div class="grid">
-<label>Temps road-book<input id="freeRb" inputmode="numeric" maxlength="6" placeholder="07:30"></label>
-<label>Temps réel<input id="freeReal" inputmode="numeric" maxlength="6" placeholder="07:42"></label>
+<section id="delta" class="hidden">
+<div class="panel">
+<h2>Delta libre</h2>
+<div class="grid">
+<label>Temps road-book<input id="freeRb" inputmode="numeric" placeholder="07:30"></label>
+<label>Temps réel<input id="freeReal" inputmode="numeric" placeholder="07:42"></label>
 </div>
-<div class="center" style="margin-top:15px"><div class="muted">Écart</div><div id="freeOut" class="big">—</div><div id="freeStatus" style="font-size:18px;font-weight:900">—</div></div></div>
+<div class="center" style="margin-top:15px"><div class="muted">Écart</div><div id="freeOut" class="delta">—</div><div id="freeStatus" class="courseStatus">—</div></div>
+</div>
 </section>
-<div class="muted center" style="font-size:11px">Version d'entraînement.</div>
 </div>
 
 <script>
-let zrs=[],activeZr=0,coursePoint=1,realDigits="";
+(function(){
+"use strict";
+var KEY="transmaroc_v8_data";
+var zrs=[],activeZr=0,coursePoint=1,realDigits="";
 
-const $=id=>document.getElementById(id);
-function num(v){return parseFloat(String(v).replace(",","."))}
-function parseTime(v){
- let p=String(v).trim().split(":");
- if(p.length===2){let m=Number(p[0]),s=Number(p[1]);return Number.isFinite(m)&&Number.isFinite(s)&&s<60?m*60+s:null}
- if(p.length===3){let h=Number(p[0]),m=Number(p[1]),s=Number(p[2]);return Number.isFinite(h)&&Number.isFinite(m)&&Number.isFinite(s)&&m<60&&s<60?h*3600+m*60+s:null}
- return null;
-}
-function fmt(sec){sec=Math.max(0,Math.round(sec));let h=Math.floor(sec/3600);sec%=3600;let m=Math.floor(sec/60),s=sec%60;return (h?String(h).padStart(2,"0")+":":"")+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")}
-function fmtShort(sec){sec=Math.max(0,Math.round(sec));return String(Math.floor(sec/60)).padStart(2,"0")+":"+String(sec%60).padStart(2,"0")}
-function deltaFmt(d){let sign=d>0?"+":d<0?"−":"±",a=Math.abs(Math.round(d));return sign+String(Math.floor(a/60)).padStart(2,"0")+":"+String(a%60).padStart(2,"0")}
-function normalizeTime(e){
- let v=e.target.value.replace(/\D/g,"").slice(0,6);
- if(v.length<=4){if(v.length>2)v=v.slice(0,-2)+":"+v.slice(-2)}
- else v=v.slice(0,-4)+":"+v.slice(-4,-2)+":"+v.slice(-2);
- e.target.value=v;
-}
-function rows(zr){let cd=0,ct=0;return zr.segs.map((x,i)=>{let t=x.d/x.s*3600;cd+=x.d;ct+=t;return {...x,i:i+1,cd,ct,t}})}
+function $(id){return document.getElementById(id)}
+function num(v){return parseFloat(String(v).replace(",", "."))}
+function fmt(sec){sec=Math.max(0,Math.round(sec));var h=Math.floor(sec/3600);sec%=3600;var m=Math.floor(sec/60),s=sec%60;return (h?String(h).padStart(2,"0")+":":"")+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")}
+function short(sec){sec=Math.max(0,Math.round(sec));return String(Math.floor(sec/60)).padStart(2,"0")+":"+String(sec%60).padStart(2,"0")}
+function deltaFmt(d){var sign=d>0?"+":d<0?"−":"±",a=Math.abs(Math.round(d));return sign+String(Math.floor(a/60)).padStart(2,"0")+":"+String(a%60).padStart(2,"0")}
+function rows(z){var cd=0,ct=0;return (z&&z.segs||[]).map(function(x,i){var t=x.d/x.s*3600;cd+=x.d;ct+=t;return {i:i+1,d:x.d,s:x.s,note:x.note||"",t:t,cd:cd,ct:ct}})}
 function current(){return zrs[activeZr]||null}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({zrs:zrs,activeZr:activeZr,coursePoint:coursePoint,dayName:$("dayName").value}))}catch(e){}}
+function load(){try{var x=JSON.parse(localStorage.getItem(KEY)||"null");if(x&&Array.isArray(x.zrs)){zrs=x.zrs;activeZr=x.activeZr||0;coursePoint=x.coursePoint||1;if($("dayName"))$("dayName").value=x.dayName||"Jour 1"}}catch(e){}}
 
-function renderZrSelectors(){
- const sel=$("zrSelect"),csel=$("courseZr");
- sel.innerHTML=zrs.map((z,i)=>`<option value="${i}">${z.name}</option>`).join("");
- csel.innerHTML=zrs.map((z,i)=>`<option value="${i}">${z.name}</option>`).join("");
- if(zrs.length){sel.value=activeZr;csel.value=activeZr}
- $("zrCount").textContent=zrs.length+" ZR"+(zrs.length===1?"":"s");
- $("zrList").innerHTML=zrs.map((z,i)=>{
-   let rs=rows(z),dist=rs.length?rs[rs.length-1].cd:0,time=rs.length?rs[rs.length-1].ct:0;
-   return `<div class="zrItem"><div class="zrInfo"><strong>${z.name}</strong><span>${z.start} · ${rs.length} tronçon${rs.length===1?"":"s"} · ${dist.toFixed(2)} km · ${fmt(time)}</span></div><button data-zr="${i}" style="min-height:40px">${i===activeZr?"Active":"Sélectionner"}</button></div>`;
- }).join("");
- document.querySelectorAll("[data-zr]").forEach(b=>b.onclick=()=>{activeZr=Number(b.dataset.zr);coursePoint=1;renderAll()});
+function renderSelectors(){
+$("zrSelect").innerHTML=zrs.map(function(z,i){return '<option value="'+i+'">'+escapeHtml(z.name)+'</option>'}).join("");
+$("courseZr").innerHTML=zrs.map(function(z,i){return '<option value="'+i+'">'+escapeHtml(z.name)+'</option>'}).join("");
+if(zrs.length){$("zrSelect").value=String(activeZr);$("courseZr").value=String(activeZr)}
 }
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 function renderTable(){
- const z=current(),rs=z?rows(z):[];
- $("segments").innerHTML=rs.map((r,i)=>`<tr><td>${r.i}</td><td>${r.d.toFixed(2)} km</td><td>${r.cd.toFixed(2)} km</td><td>${r.s.toFixed(1)} km/h</td><td>${fmtShort(r.t)}</td><td><strong>${fmt(r.ct)}</strong></td><td>${r.note||"—"}</td><td><button data-del="${i}" style="min-height:36px;font-size:12px">Supprimer</button></td></tr>`).join("");
- $("empty").style.display=rs.length?"none":"block";$("segCount").textContent=rs.length+" tronçon"+(rs.length===1?"":"s");
- $("sumSeg").textContent=rs.length;$("sumDist").textContent=(rs.length?rs[rs.length-1].cd:0).toFixed(2).replace(".",",")+" km";$("sumTime").textContent=rs.length?fmt(rs[rs.length-1].ct):"00:00:00";
- $("activeTitle").textContent=z?z.name:"ZR active";
- document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{current().segs.splice(Number(b.dataset.del),1);coursePoint=Math.min(coursePoint,current().segs.length||1);renderAll()});
+var z=current(),rs=rows(z);
+$("sumSeg").textContent=rs.length;
+$("sumDist").textContent=(rs.length?rs[rs.length-1].cd:0).toFixed(2).replace(".",",")+" km";
+$("sumTime").textContent=rs.length?fmt(rs[rs.length-1].ct):"00:00:00";
+$("empty").classList.toggle("hidden",rs.length>0);
+$("segTable").classList.toggle("hidden",rs.length===0);
+$("segBody").innerHTML=rs.map(function(r){return '<tr><td>'+r.i+'</td><td>'+r.d.toFixed(2)+' km</td><td>'+r.cd.toFixed(2)+' km</td><td>'+r.s.toFixed(1)+'</td><td>'+short(r.t)+'</td><td><strong>'+fmt(r.ct)+'</strong></td><td>'+escapeHtml(r.note||"—")+'</td><td><button type="button" data-del="'+(r.i-1)+'">Suppr.</button></td></tr>'}).join("");
+document.querySelectorAll("[data-del]").forEach(function(b){b.addEventListener("click",function(){var z=current();if(!z)return;z.segs.splice(Number(b.getAttribute("data-del")),1);coursePoint=Math.min(coursePoint,z.segs.length||1);save();renderAll()})});
+}
+function renderList(){
+$("zrList").innerHTML=zrs.map(function(z,i){var rs=rows(z),d=rs.length?rs[rs.length-1].cd:0,t=rs.length?rs[rs.length-1].ct:0;return '<div class="zrItem"><div class="zrInfo"><strong>'+escapeHtml(z.name)+'</strong><span>'+escapeHtml(z.start)+' · '+rs.length+' tronçon(s) · '+d.toFixed(2)+' km · '+fmt(t)+'</span></div><button type="button" data-select-zr="'+i+'">'+(i===activeZr?"Active":"Sélectionner")+'</button></div>'}).join("")||'<div class="muted">Aucune ZR créée.</div>';
+document.querySelectorAll("[data-select-zr]").forEach(function(b){b.addEventListener("click",function(){activeZr=Number(b.getAttribute("data-select-zr"));coursePoint=1;save();renderAll()})});
 }
 function renderCourse(){
- const z=zrs[Number($("courseZr").value)||0],rs=z?rows(z):[],r=rs[coursePoint-1];
- $("courseName").textContent=z?z.name:"ZR";
- $("pointNo").textContent=rs.length?coursePoint:0;
- $("targetDist").textContent=r?r.cd.toFixed(2)+" km":"—";
- $("targetTime").textContent=r?fmt(r.ct):"—";
- $("courseNote").textContent=r?(r.note||""):"Prépare d'abord la ZR.";
- calcCourse();
+var idx=Number($("courseZr").value),z=zrs[idx],rs=rows(z),r=rs[coursePoint-1];
+$("pointNo").textContent=rs.length?coursePoint:0;
+$("targetDist").textContent=r?r.cd.toFixed(2)+" km":"—";
+$("targetTime").textContent=r?fmt(r.ct):"—";
+$("courseNote").textContent=r?(r.note||""):"Prépare d'abord la ZR.";
+calcCourse();
+renderHistory();
 }
 function calcCourse(){
- const z=zrs[Number($("courseZr").value)||0],r=z?rows(z)[coursePoint-1]:null;
- const light=$("statusLight");
- light.className="statusLight neutral"; light.textContent="—";
- if(!r || realDigits.length!==4){
-   $("courseDelta").textContent="—";
-   $("courseStatus").textContent="Saisis MMSS";
-   return;
- }
- const m=Number(realDigits.slice(0,2)),s=Number(realDigits.slice(2,4));
- if(s>59){$("courseDelta").textContent="—";$("courseStatus").textContent="Secondes invalides";return}
- const real=m*60+s, d=real-r.ct, a=Math.abs(d);
- $("courseDelta").textContent=deltaFmt(d);
- if(a<=5){
-   light.className="statusLight green"; light.textContent="BON";
-   $("courseStatus").textContent=d===0?"À L’HEURE":"LÉGER RETARD";
- }else if(d>0 && a<=15){
-   light.className="statusLight orange"; light.textContent="ATTENTION";
-   $("courseStatus").textContent="RETARD";
- }else if(d>15){
-   light.className="statusLight red"; light.textContent="RETARD";
-   $("courseStatus").textContent="RETARD IMPORTANT";
- }else{
-   light.className="statusLight orange"; light.textContent="AVANCE";
-   $("courseStatus").textContent="EN AVANCE";
- }
+var idx=Number($("courseZr").value),z=zrs[idx],r=rows(z)[coursePoint-1],light=$("statusLight");
+light.className="statusLight neutral";light.textContent="—";
+if(!r||realDigits.length!==4){$("courseDelta").textContent="—";$("courseStatus").textContent="Saisis MMSS";return}
+var m=Number(realDigits.slice(0,2)),s=Number(realDigits.slice(2,4));
+if(s>59){$("courseDelta").textContent="—";$("courseStatus").textContent="Secondes invalides";return}
+var real=m*60+s,d=real-r.ct,a=Math.abs(d);
+$("courseDelta").textContent=deltaFmt(d);
+if(a<=5){light.className="statusLight green";light.textContent="BON";$("courseStatus").textContent=d===0?"À L'HEURE":"LÉGER RETARD"}
+else if(d>0&&a<=15){light.className="statusLight orange";light.textContent="ATTENTION";$("courseStatus").textContent="RETARD"}
+else if(d>15){light.className="statusLight red";light.textContent="RETARD";$("courseStatus").textContent="RETARD IMPORTANT"}
+else{light.className="statusLight orange";light.textContent="AVANCE";$("courseStatus").textContent="EN AVANCE"}
 }
-function renderCourseHistory(){
- const z=zrs[Number($("courseZr").value)||0];let h=z&&z.history?z.history:[];
- $("courseHistory").innerHTML=h.length?h.slice().reverse().map(x=>`<div style="padding:6px 0;border-bottom:1px solid #e5e7eb">Tronçon ${x.point} · cible ${fmt(x.target)} · réel ${fmt(x.real)} · <strong>${deltaFmt(x.delta)}</strong></div>`).join(""):"Aucun contrôle.";
-}
-function renderAll(){renderZrSelectors();renderTable();renderCourse();renderCourseHistory()}
-$("addZr").onclick=()=>{
- let name=$("newZrName").value.trim()||("ZR "+(zrs.length+1)),start=$("newZrStart").value.trim()||"10:00:00";
- zrs.push({name,start,segs:[],history:[]});activeZr=zrs.length-1;coursePoint=1;
- $("newZrName").value="";renderAll();
-};
-$("zrSelect").onchange=e=>{activeZr=Number(e.target.value);coursePoint=1;renderAll()};
-$("addSeg").onclick=()=>{
- let z=current(),d=num($("segDist").value),s=num($("segSpeed").value),note=$("segNote").value.trim();
- if(!z){$("msg").textContent="Crée d'abord une ZR.";return}
- if(!Number.isFinite(d)||d<=0||!Number.isFinite(s)||s<=0){$("msg").textContent="Distance et moyenne doivent être valides.";return}
- z.segs.push({d,s,note});$("segDist").value="";$("segSpeed").value="";$("segNote").value="";$("msg").textContent="";renderAll();$("segDist").focus();
-};
-$("loadDemo").onclick=()=>{
- zrs=[
- {name:"ZR 1 — Régularité",start:"10:00:00",history:[],segs:[{d:2.4,s:40,note:"Début ZR"},{d:3.2,s:35,note:"Changement moyenne"},{d:1.8,s:42,note:""}]},
- {name:"ZR 2 — Navigation",start:"12:15:00",history:[],segs:[{d:1.6,s:38,note:"Départ"},{d:2.8,s:32,note:"Navigation"},{d:3.5,s:40,note:""}]},
- {name:"ZR 3 — Fin d'étape",start:"15:30:00",history:[],segs:[{d:4.0,s:36,note:""},{d:2.2,s:30,note:"Changement moyenne"}]}
- ];
- activeZr=0;coursePoint=1;renderAll();
-};
-$("clearDay").onclick=()=>{if(confirm("Effacer toutes les ZR de cette journée ?")){zrs=[];activeZr=0;coursePoint=1;renderAll()}};
-$("courseZr").onchange=()=>{coursePoint=1;realDigits="";updateRealDisplay();renderCourse();renderCourseHistory()};
-$("saveCourse").onclick=()=>{
- const z=zrs[Number($("courseZr").value)||0],r=z?rows(z)[coursePoint-1]:null;
- if(!z||!r||realDigits.length!==4)return;
- const m=Number(realDigits.slice(0,2)),s=Number(realDigits.slice(2,4)); if(s>59)return;
- const real=m*60+s; z.history.push({point:coursePoint,target:r.ct,real,delta:real-r.ct}); renderCourseHistory();
-};
-$("nextPoint").onclick=()=>{let z=zrs[Number($("courseZr").value)||0];if(z&&coursePoint<z.segs.length){coursePoint++;realDigits="";updateRealDisplay();renderCourse()}};
-$("prevPoint").onclick=()=>{if(coursePoint>1){coursePoint--;realDigits="";updateRealDisplay();renderCourse()}};
-$("resetCourse").onclick=()=>{let z=zrs[Number($("courseZr").value)||0];if(z)z.history=[];coursePoint=1;realDigits="";updateRealDisplay();renderCourse();renderCourseHistory()};
-function updateRealDisplay(){
- let v=realDigits;
- if(v.length===0)$("realDisplay").textContent="--:--";
- else if(v.length<3)$("realDisplay").textContent=v.padStart(2,"0")+":--";
- else $("realDisplay").textContent=v.slice(0,2)+":"+v.slice(2).padStart(2,"0");
- calcCourse();
-}
-document.querySelectorAll("#keypad [data-key]").forEach(b=>b.onclick=()=>{
- const k=b.dataset.key;
- if(k==="C") realDigits="";
- else if(k==="B") realDigits=realDigits.slice(0,-1);
- else if(realDigits.length<4) realDigits+=k;
- updateRealDisplay();
+function renderHistory(){var z=zrs[Number($("courseZr").value)],h=z&&z.history||[];$("courseHistory").innerHTML=h.length?h.slice().reverse().map(function(x){return '<div style="padding:7px 0;border-bottom:1px solid #e5e7eb">Tronçon '+x.point+' · cible '+fmt(x.target)+' · réel '+fmt(x.real)+' · <strong>'+deltaFmt(x.delta)+'</strong></div>'}).join(""):"Aucun contrôle."}
+function renderAll(){renderSelectors();renderTable();renderList();renderCourse()}
+function tab(name){$("prep").classList.toggle("hidden",name!=="prep");$("course").classList.toggle("hidden",name!=="course");$("delta").classList.toggle("hidden",name!=="delta");$("tabPrep").classList.toggle("primary",name==="prep");$("tabCourse").classList.toggle("primary",name==="course");$("tabDelta").classList.toggle("primary",name==="delta");if(name==="course")renderCourse()}
+
+$("addZr").addEventListener("click",function(){
+var name=$("newZrName").value.trim()||("ZR "+(zrs.length+1)),start=$("newZrStart").value.trim()||"10:00:00";
+zrs.push({name:name,start:start,segs:[],history:[]});activeZr=zrs.length-1;coursePoint=1;
+$("zrMsg").textContent="✓ "+name+" créée";
+$("newZrName").value="ZR "+(zrs.length+1);
+save();renderAll();
 });
-function calcFree(){let a=parseTime($("freeRb").value),b=parseTime($("freeReal").value);if(a===null||b===null){$("freeOut").textContent="—";$("freeStatus").textContent="—";return}let d=b-a;$("freeOut").textContent=deltaFmt(d);$("freeStatus").textContent=d>0?"RETARD":d<0?"AVANCE":"À L’HEURE"}
-$("freeRb").addEventListener("input",e=>{normalizeTime(e);calcFree()});$("freeReal").addEventListener("input",e=>{normalizeTime(e);calcFree()});
-function tab(n){$("prep").classList.toggle("hidden",n!=="prep");$("course").classList.toggle("hidden",n!=="course");$("freeDelta").classList.toggle("hidden",n!=="free");$("tPrep").classList.toggle("primary",n==="prep");$("tCourse").classList.toggle("primary",n==="course");$("tDelta").classList.toggle("primary",n==="free");if(n==="course"){renderCourse();renderCourseHistory();updateRealDisplay()}}
-$("tPrep").onclick=()=>tab("prep");$("tCourse").onclick=()=>tab("course");$("tDelta").onclick=()=>tab("free");
-renderAll();
+
+$("addSeg").addEventListener("click",function(){
+var z=current(),d=num($("segDist").value),s=num($("segSpeed").value),note=$("segNote").value.trim();
+if(!z){$("segMsg").textContent="Crée d'abord une ZR.";return}
+if(!Number.isFinite(d)||d<=0||!Number.isFinite(s)||s<=0){$("segMsg").textContent="Distance et moyenne invalides.";return}
+z.segs.push({d:d,s:s,note:note});$("segDist").value="";$("segSpeed").value="";$("segNote").value="";$("segMsg").textContent="✓ Tronçon ajouté";
+save();renderAll();$("segDist").focus();
+});
+$("zrSelect").addEventListener("change",function(){activeZr=Number(this.value);coursePoint=1;save();renderAll()});
+$("courseZr").addEventListener("change",function(){activeZr=Number(this.value);coursePoint=1;realDigits="";updateDisplay();save();renderCourse()});
+$("tabPrep").addEventListener("click",function(){tab("prep")});
+$("tabCourse").addEventListener("click",function(){tab("course")});
+$("tabDelta").addEventListener("click",function(){tab("delta")});
+$("courseToPrep").addEventListener("click",function(){tab("prep")});
+
+document.querySelectorAll("#keypad [data-key]").forEach(function(b){b.addEventListener("click",function(){var k=b.getAttribute("data-key");if(k==="C")realDigits="";else if(k==="B")realDigits=realDigits.slice(0,-1);else if(realDigits.length<4)realDigits+=k;updateDisplay()})});
+function updateDisplay(){if(realDigits.length===0)$("realDisplay").textContent="--:--";else if(realDigits.length<3)$("realDisplay").textContent=realDigits.padStart(2,"0")+":--";else $("realDisplay").textContent=realDigits.slice(0,2)+":"+realDigits.slice(2).padStart(2,"0");calcCourse()}
+
+$("saveCourse").addEventListener("click",function(){var z=zrs[Number($("courseZr").value)],r=rows(z)[coursePoint-1];if(!z||!r||realDigits.length!==4)return;var m=Number(realDigits.slice(0,2)),s=Number(realDigits.slice(2,4));if(s>59)return;var real=m*60+s;z.history=z.history||[];z.history.push({point:coursePoint,target:r.ct,real:real,delta:real-r.ct});save();renderHistory()});
+$("nextPoint").addEventListener("click",function(){var z=zrs[Number($("courseZr").value)];if(z&&coursePoint<z.segs.length){coursePoint++;realDigits="";updateDisplay();save();renderCourse()}});
+$("prevPoint").addEventListener("click",function(){if(coursePoint>1){coursePoint--;realDigits="";updateDisplay();save();renderCourse()}});
+$("resetCourse").addEventListener("click",function(){var z=zrs[Number($("courseZr").value)];if(z)z.history=[];coursePoint=1;realDigits="";updateDisplay();save();renderCourse()});
+$("demo").addEventListener("click",function(){zrs=[{name:"ZR 1 — Régularité",start:"10:00:00",history:[],segs:[{d:2.4,s:40,note:"Début ZR"},{d:3.2,s:35,note:"Changement moyenne"},{d:1.8,s:42,note:""}]},{name:"ZR 2 — Navigation",start:"12:15:00",history:[],segs:[{d:1.6,s:38,note:"Départ"},{d:2.8,s:32,note:"Navigation"},{d:3.5,s:40,note:""}]}];activeZr=0;coursePoint=1;save();renderAll()});
+$("clearDay").addEventListener("click",function(){if(confirm("Effacer toutes les ZR de cette journée ?")){zrs=[];activeZr=0;coursePoint=1;save();renderAll()}});
+
+function parseT(v){var p=String(v).trim().split(":");if(p.length!==2)return null;var m=Number(p[0]),s=Number(p[1]);return Number.isFinite(m)&&Number.isFinite(s)&&s<60?m*60+s:null}
+function freeCalc(){var a=parseT($("freeRb").value),b=parseT($("freeReal").value);if(a===null||b===null){$("freeOut").textContent="—";$("freeStatus").textContent="—";return}var d=b-a;$("freeOut").textContent=deltaFmt(d);$("freeStatus").textContent=d>0?"RETARD":d<0?"AVANCE":"À L'HEURE"}
+$("freeRb").addEventListener("input",freeCalc);$("freeReal").addEventListener("input",freeCalc);
+
+load();renderAll();
+})();
 </script>
 </body>
 </html>
