@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#111827">
-<title>Copilote TransMaroc V8</title>
+<title>Copilote TransMaroc V9</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,sans-serif;background:#f3f4f6;color:#111827}
@@ -93,33 +93,45 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px
 <section id="course" class="hidden">
 <div class="panel">
 <label>ZR en course<select id="courseZr"></select></label>
+
 <div class="courseTop" style="margin-top:10px">
 <div class="bigbox">Tronçon<strong class="value" id="pointNo">0</strong></div>
-<div class="bigbox">Distance cible<strong class="value" id="targetDist">—</strong></div>
+<div class="bigbox">Distance<strong class="value" id="targetDist">—</strong></div>
 </div>
-<div class="bigbox" style="margin-top:10px">Temps cible cumulé<strong class="value" id="targetTime">—</strong></div>
+
+<div class="courseTop" style="margin-top:10px">
+<div class="bigbox">Temps cible tronçon<strong class="value" id="targetSegTime">—</strong></div>
+<div class="bigbox">Cible cumulée<strong class="value" id="targetTime">—</strong></div>
+</div>
+
 <div id="courseNote" class="center muted" style="margin:9px 0"></div>
+
+<div class="bigbox" style="margin-top:10px">
+<div class="muted">CHRONO DU TRONÇON</div>
+<div id="timerDisplay" class="value" style="font-size:44px">00:00</div>
+</div>
+
+<button id="startTimer" class="primary" type="button" style="width:100%;font-size:25px;min-height:82px;margin-top:12px">▶ DÉMARRER LE CHRONO</button>
+<button id="stopTimer" type="button" style="width:100%;font-size:22px;min-height:72px;margin-top:10px;display:none">■ STOP + ENREGISTRER</button>
+
 <div id="statusLight" class="statusLight neutral">—</div>
 <div id="courseDelta" class="delta">—</div>
-<div id="courseStatus" class="courseStatus">Saisis MMSS</div>
+<div id="courseStatus" class="courseStatus">Prêt à démarrer</div>
 </div>
 
 <div class="panel">
-<div class="bigbox"><div class="muted">Temps réel</div><div id="realDisplay" class="value">--:--</div></div>
+<div class="bigbox"><div class="muted">Temps manuel (si besoin)</div><div id="realDisplay" class="value">--:--</div></div>
 <div class="keypad">
 <button class="key" type="button" data-key="1">1</button><button class="key" type="button" data-key="2">2</button><button class="key" type="button" data-key="3">3</button>
 <button class="key" type="button" data-key="4">4</button><button class="key" type="button" data-key="5">5</button><button class="key" type="button" data-key="6">6</button>
 <button class="key" type="button" data-key="7">7</button><button class="key" type="button" data-key="8">8</button><button class="key" type="button" data-key="9">9</button>
 <button class="key action" type="button" data-key="C">EFFACER</button><button class="key" type="button" data-key="0">0</button><button class="key action" type="button" data-key="B">⌫</button>
 </div>
-<div class="courseActions">
-<button id="saveCourse" class="primary" type="button">ENREGISTRER</button>
-<button id="nextPoint" class="primary" type="button">SUIVANT ▶</button>
-</div>
+<button id="saveManual" class="primary" type="button" style="width:100%">ENREGISTRER LE TEMPS MANUEL</button>
 <div class="three" style="margin-top:10px"><button id="prevPoint" type="button">◀ PRÉC.</button><button id="resetCourse" type="button">RAZ</button><button id="courseToPrep" type="button">PRÉPA</button></div>
 </div>
 
-<div class="panel"><h2>Historique</h2><div id="courseHistory" class="muted">Aucun contrôle.</div></div>
+<div class="panel"><h2>Historique des tronçons</h2><div id="courseHistory" class="muted">Aucun contrôle.</div></div>
 </section>
 
 <section id="delta" class="hidden">
@@ -138,7 +150,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px
 (function(){
 "use strict";
 var KEY="transmaroc_v8_data";
-var zrs=[],activeZr=0,coursePoint=1,realDigits="";
+var zrs=[],activeZr=0,coursePoint=1,realDigits="",timerRunning=false,timerStart=0,timerElapsed=0,timerInterval=null;
 
 function $(id){return document.getElementById(id)}
 function num(v){return parseFloat(String(v).replace(",", "."))}
@@ -173,24 +185,57 @@ document.querySelectorAll("[data-select-zr]").forEach(function(b){b.addEventList
 function renderCourse(){
 var idx=Number($("courseZr").value),z=zrs[idx],rs=rows(z),r=rs[coursePoint-1];
 $("pointNo").textContent=rs.length?coursePoint:0;
-$("targetDist").textContent=r?r.cd.toFixed(2)+" km":"—";
+$("targetDist").textContent=r?r.d.toFixed(2)+" km":"—";
+$("targetSegTime").textContent=r?short(r.t):"—";
 $("targetTime").textContent=r?fmt(r.ct):"—";
 $("courseNote").textContent=r?(r.note||""):"Prépare d'abord la ZR.";
+if(!timerRunning) $("timerDisplay").textContent=short(timerElapsed);
 calcCourse();
 renderHistory();
 }
 function calcCourse(){
 var idx=Number($("courseZr").value),z=zrs[idx],r=rows(z)[coursePoint-1],light=$("statusLight");
 light.className="statusLight neutral";light.textContent="—";
-if(!r||realDigits.length!==4){$("courseDelta").textContent="—";$("courseStatus").textContent="Saisis MMSS";return}
-var m=Number(realDigits.slice(0,2)),s=Number(realDigits.slice(2,4));
-if(s>59){$("courseDelta").textContent="—";$("courseStatus").textContent="Secondes invalides";return}
-var real=m*60+s,d=real-r.ct,a=Math.abs(d);
+var real=timerRunning?getElapsed():timerElapsed;
+if(!r||real<=0){$("courseDelta").textContent="—";$("courseStatus").textContent=timerRunning?"CHRONO EN COURS":"Prêt à démarrer";return}
+var d=real-r.t,a=Math.abs(d);
 $("courseDelta").textContent=deltaFmt(d);
 if(a<=5){light.className="statusLight green";light.textContent="BON";$("courseStatus").textContent=d===0?"À L'HEURE":"LÉGER RETARD"}
 else if(d>0&&a<=15){light.className="statusLight orange";light.textContent="ATTENTION";$("courseStatus").textContent="RETARD"}
 else if(d>15){light.className="statusLight red";light.textContent="RETARD";$("courseStatus").textContent="RETARD IMPORTANT"}
 else{light.className="statusLight orange";light.textContent="AVANCE";$("courseStatus").textContent="EN AVANCE"}
+}
+function getElapsed(){return timerRunning?((Date.now()-timerStart)/1000):timerElapsed}
+function updateTimerUI(){
+var e=getElapsed();
+$("timerDisplay").textContent=short(e);
+calcCourse();
+}
+function startTimer(){
+if(timerRunning)return;
+var z=zrs[Number($("courseZr").value)],r=rows(z)[coursePoint-1];
+if(!r){$("courseStatus").textContent="Aucun tronçon";return}
+timerRunning=true;timerStart=Date.now()-timerElapsed*1000;
+$("startTimer").style.display="none";$("stopTimer").style.display="block";
+$("courseStatus").textContent="CHRONO EN COURS";
+timerInterval=setInterval(updateTimerUI,200);
+}
+function stopTimer(saveIt){
+if(!timerRunning)return;
+timerElapsed=getElapsed();timerRunning=false;
+clearInterval(timerInterval);timerInterval=null;
+$("startTimer").style.display="block";$("stopTimer").style.display="none";
+$("startTimer").textContent="↻ REFAIRE LE CHRONO";
+updateTimerUI();
+if(saveIt) saveCourseTime(timerElapsed,"chrono");
+save();
+}
+function saveCourseTime(real,source){
+var z=zrs[Number($("courseZr").value)],r=rows(z)[coursePoint-1];
+if(!z||!r||real<=0)return;
+z.history=z.history||[];
+z.history.push({point:coursePoint,target:r.t,real:Math.round(real),delta:Math.round(real-r.t),source:source});
+save();renderHistory();
 }
 function renderHistory(){var z=zrs[Number($("courseZr").value)],h=z&&z.history||[];$("courseHistory").innerHTML=h.length?h.slice().reverse().map(function(x){return '<div style="padding:7px 0;border-bottom:1px solid #e5e7eb">Tronçon '+x.point+' · cible '+fmt(x.target)+' · réel '+fmt(x.real)+' · <strong>'+deltaFmt(x.delta)+'</strong></div>'}).join(""):"Aucun contrôle."}
 function renderAll(){renderSelectors();renderTable();renderList();renderCourse()}
@@ -218,15 +263,53 @@ $("tabCourse").addEventListener("click",function(){tab("course")});
 $("tabDelta").addEventListener("click",function(){tab("delta")});
 $("courseToPrep").addEventListener("click",function(){tab("prep")});
 
-document.querySelectorAll("#keypad [data-key]").forEach(function(b){b.addEventListener("click",function(){var k=b.getAttribute("data-key");if(k==="C")realDigits="";else if(k==="B")realDigits=realDigits.slice(0,-1);else if(realDigits.length<4)realDigits+=k;updateDisplay()})});
-function updateDisplay(){if(realDigits.length===0)$("realDisplay").textContent="--:--";else if(realDigits.length<3)$("realDisplay").textContent=realDigits.padStart(2,"0")+":--";else $("realDisplay").textContent=realDigits.slice(0,2)+":"+realDigits.slice(2).padStart(2,"0");calcCourse()}
-
-$("saveCourse").addEventListener("click",function(){var z=zrs[Number($("courseZr").value)],r=rows(z)[coursePoint-1];if(!z||!r||realDigits.length!==4)return;var m=Number(realDigits.slice(0,2)),s=Number(realDigits.slice(2,4));if(s>59)return;var real=m*60+s;z.history=z.history||[];z.history.push({point:coursePoint,target:r.ct,real:real,delta:real-r.ct});save();renderHistory()});
-$("nextPoint").addEventListener("click",function(){var z=zrs[Number($("courseZr").value)];if(z&&coursePoint<z.segs.length){coursePoint++;realDigits="";updateDisplay();save();renderCourse()}});
-$("prevPoint").addEventListener("click",function(){if(coursePoint>1){coursePoint--;realDigits="";updateDisplay();save();renderCourse()}});
-$("resetCourse").addEventListener("click",function(){var z=zrs[Number($("courseZr").value)];if(z)z.history=[];coursePoint=1;realDigits="";updateDisplay();save();renderCourse()});
-$("demo").addEventListener("click",function(){zrs=[{name:"ZR 1 — Régularité",start:"10:00:00",history:[],segs:[{d:2.4,s:40,note:"Début ZR"},{d:3.2,s:35,note:"Changement moyenne"},{d:1.8,s:42,note:""}]},{name:"ZR 2 — Navigation",start:"12:15:00",history:[],segs:[{d:1.6,s:38,note:"Départ"},{d:2.8,s:32,note:"Navigation"},{d:3.5,s:40,note:""}]}];activeZr=0;coursePoint=1;save();renderAll()});
-$("clearDay").addEventListener("click",function(){if(confirm("Effacer toutes les ZR de cette journée ?")){zrs=[];activeZr=0;coursePoint=1;save();renderAll()}});
+document.querySelectorAll("#keypad [data-key]").forEach(function(b){
+b.addEventListener("click",function(){
+if(timerRunning)return;
+var k=b.getAttribute("data-key");
+if(k==="C")realDigits="";
+else if(k==="B")realDigits=realDigits.slice(0,-1);
+else if(realDigits.length<4)realDigits+=k;
+updateManualDisplay();
+});
+});
+function updateManualDisplay(){
+if(realDigits.length===0)$("realDisplay").textContent="--:--";
+else if(realDigits.length<3)$("realDisplay").textContent=realDigits.padStart(2,"0")+":--";
+else $("realDisplay").textContent=realDigits.slice(0,2)+":"+realDigits.slice(2).padStart(2,"0");
+}
+$("startTimer").addEventListener("click",function(){startTimer()});
+$("stopTimer").addEventListener("click",function(){stopTimer(true)});
+$("saveManual").addEventListener("click",function(){
+if(timerRunning)return;
+if(realDigits.length!==4)return;
+var m=Number(realDigits.slice(0,2)),s=Number(realDigits.slice(2,4));
+if(s>59)return;
+var real=m*60+s;timerElapsed=real;
+$("timerDisplay").textContent=short(real);
+saveCourseTime(real,"manuel");
+calcCourse();
+});
+$("nextPoint").addEventListener("click",function(){});
+$("prevPoint").addEventListener("click",function(){
+if(timerRunning)stopTimer(false);
+if(coursePoint>1){coursePoint--;timerElapsed=0;realDigits="";$("startTimer").textContent="▶ DÉMARRER LE CHRONO";$("startTimer").style.display="block";$("stopTimer").style.display="none";updateManualDisplay();save();renderCourse()}
+});
+$("resetCourse").addEventListener("click",function(){
+if(timerRunning)stopTimer(false);
+var z=zrs[Number($("courseZr").value)];if(z)z.history=[];
+coursePoint=1;timerElapsed=0;realDigits="";
+$("startTimer").textContent="▶ DÉMARRER LE CHRONO";
+$("startTimer").style.display="block";$("stopTimer").style.display="none";
+updateManualDisplay();save();renderCourse();
+});
+$("courseZr").addEventListener("change",function(){
+if(timerRunning)stopTimer(false);
+activeZr=Number(this.value);coursePoint=1;realDigits="";timerElapsed=0;
+$("startTimer").textContent="▶ DÉMARRER LE CHRONO";
+$("startTimer").style.display="block";$("stopTimer").style.display="none";
+save();renderCourse();
+});
 
 function parseT(v){var p=String(v).trim().split(":");if(p.length!==2)return null;var m=Number(p[0]),s=Number(p[1]);return Number.isFinite(m)&&Number.isFinite(s)&&s<60?m*60+s:null}
 function freeCalc(){var a=parseT($("freeRb").value),b=parseT($("freeReal").value);if(a===null||b===null){$("freeOut").textContent="—";$("freeStatus").textContent="—";return}var d=b-a;$("freeOut").textContent=deltaFmt(d);$("freeStatus").textContent=d>0?"RETARD":d<0?"AVANCE":"À L'HEURE"}
