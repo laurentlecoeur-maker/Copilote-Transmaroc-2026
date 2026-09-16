@@ -34,7 +34,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px
 </head>
 <body>
 <div class="app">
-<h1>Copilote TransMaroc V21</h1>
+<h1>Copilote TransMaroc V8</h1>
 <div class="sub">Plusieurs ZR par journée · préparation complète puis mode Course.</div>
 
 <div class="tabs">
@@ -44,6 +44,16 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px
 </div>
 
 <section id="prep">
+<div class="card" style="margin-bottom:12px">
+  <h2>📅 Journées</h2>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+    <label style="flex:1;min-width:180px">Journée<select id="daySelect"></select></label>
+    <button type="button" id="addDayBtn" class="primary">+ Nouvelle journée</button>
+    <button type="button" id="deleteDayBtn" style="background:#fee2e2;border-color:#ef4444">🗑️ Supprimer cette journée</button>
+  </div>
+  <div id="dayMsg" class="muted" style="margin-top:7px"></div>
+</div>
+
 <div class="panel">
 <div class="grid">
 
@@ -158,7 +168,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px
 "use strict";
 
 
-var KEY="transmaroc_V21_data";
+var KEY="transmaroc_v8_data";
 var days=[{name:"Jour 1",zrs:[]}],activeDay=0;
 var zrs=days[0].zrs,activeZr=0,coursePoint=1,realDigits="",timerRunning=false,timerStart=0,timerElapsed=0,timerInterval=null;
 
@@ -540,7 +550,7 @@ $("deleteDayBtn").addEventListener("click",function(){
   zrs=days[activeDay].zrs;
   activeZr=0;coursePoint=1;realDigits="";timerElapsed=0;
   save();renderAll();
-  var m=$("dayMsg");if(m)m.textContent="✓ "+deleted+" supprimée — "+days[activeDay].name+" est maintenant active";
+  var m=$("dayMsg");if(m)m.textContent="✓ "+deleted+" supprimée";
 });
 
 load();renderAll();
