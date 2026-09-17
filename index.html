@@ -704,5 +704,59 @@ $("stopNextTimer").addEventListener("click",function(e){
 load();renderAll();if($("newZrName"))$("newZrName").value="ZR "+nextLocalZRNumber();
 })();
 </script>
+
+<script id="chrono-v46-repair">
+(function(){
+  function wireChronoButtons(){
+    var start=document.getElementById("startTimer");
+    var stop=document.getElementById("stopNextTimer");
+    var reset=document.getElementById("resetTimer");
+
+    if(start && !start.dataset.wired){
+      start.dataset.wired="1";
+      start.addEventListener("click",function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        if(typeof timerRunning!=="undefined" && timerRunning){
+          if(typeof stopTimer==="function") stopTimer();
+        }else{
+          if(typeof startTimer==="function") startTimer();
+        }
+        if(typeof renderCourse==="function") renderCourse();
+      });
+    }
+
+    if(stop && !stop.dataset.wired){
+      stop.dataset.wired="1";
+      stop.addEventListener("click",function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        if(typeof stopNextTimer==="function"){
+          stopNextTimer();
+        }else if(typeof stopTimer==="function"){
+          stopTimer();
+        }
+      });
+    }
+
+    if(reset && !reset.dataset.wired){
+      reset.dataset.wired="1";
+      reset.addEventListener("click",function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        if(typeof resetTimer==="function") resetTimer();
+      });
+    }
+  }
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",wireChronoButtons);
+  }else{
+    wireChronoButtons();
+  }
+  window.addEventListener("load",wireChronoButtons);
+})();
+</script>
+
 </body>
 </html>
