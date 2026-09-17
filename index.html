@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#111827">
-<title>Copilote TransMaroc 2026 — V21</title>
+<title>🏁 COPILOTE TRANSMAROC 2026</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,sans-serif;background:#f3f4f6;color:#111827}
@@ -34,7 +34,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px
 </head>
 <body>
 <div class="app">
-<h1>Copilote TransMaroc V8</h1>
+<h1>Copilote TransMaroc </h1>
 <div class="sub">Plusieurs ZR par journée · préparation complète puis mode Course.</div>
 
 <div class="tabs">
@@ -65,7 +65,6 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px
 <h2>Créer une nouvelle ZR</h2>
 <div class="grid">
 <label>Nom de la ZR<input id="newZrName" value="ZR 1"></label>
-<label>Heure de départ<input id="newZrStart" value="10:00:00"></label>
 </div>
 <button id="addZr" class="primary" type="button">+ Créer la ZR</button>
 <div id="zrMsg" class="center muted" style="margin-top:8px"></div>
@@ -107,7 +106,13 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px
 <section id="course" class="hidden">
 <div class="panel">
 <label>ZR en course<select id="courseZr"></select></label>
+<label style="display:block;margin-top:10px">Heure de départ ZR<input id="courseZrStart" type="time" step="1"></label>
 
+<div class="bigbox" style="margin-bottom:10px;border:2px solid #111">
+<div class="muted">⏱️ CHRONO ZR ENTIÈRE</div>
+<div id="zrTimerDisplay" class="value" style="font-size:42px">00:00</div>
+<div id="zrTimerStatus" style="font-weight:800">ZR en attente</div>
+</div>
 <div class="courseTop" style="margin-top:10px">
 <div class="bigbox">Tronçon<strong class="value" id="pointNo">0</strong></div>
 <div class="bigbox">Distance<strong class="value" id="targetDist">—</strong></div>
@@ -117,8 +122,8 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px
 </label>
 
 <div class="courseTop" style="margin-top:10px">
-<div class="bigbox">Temps cible tronçon<strong class="value" id="targetSegTime">—</strong></div>
-<div class="bigbox">Cible cumulée<strong class="value" id="targetTime">—</strong></div>
+<div class="bigbox">Temps cible tronçon<strong class="value" id="targetSegTime">—</strong><div class="muted">Temps réel tronçon : <strong id="realSegTime">—</strong></div></div>
+<div class="bigbox">Temps cible cumulé<strong class="value" id="targetTime">—</strong><div class="muted">Temps réel cumulé : <strong id="realCumTime">—</strong></div></div>
 </div>
 
 <div id="courseNote" class="center muted" style="margin:9px 0"></div>
@@ -132,20 +137,12 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px
 <button id="stopNextTimer" type="button" class="primary" style="width:100%;font-size:23px;min-height:82px;margin-top:10px;display:none">⏱ STOP + ENREGISTRER + TRONÇON SUIVANT ▶</button>
 
 <div id="statusLight" class="statusLight neutral">—</div>
-<div id="courseDelta" class="delta">—</div>
+<div class="center muted" style="margin-top:8px">Écart du tronçon</div><div id="courseDelta" class="delta">—</div>
 <div id="courseStatus" class="courseStatus">Prêt à démarrer</div><div class="center muted" style="margin-top:7px">À la fin d’un tronçon : 1 appui = arrêt, enregistrement et passage immédiat au suivant.</div>
 </div>
 
 <div class="panel">
-<div class="bigbox"><div class="muted">Temps manuel (si besoin)</div><div id="realDisplay" class="value">--:--</div></div>
-<div class="keypad">
-<button class="key" type="button" data-key="1">1</button><button class="key" type="button" data-key="2">2</button><button class="key" type="button" data-key="3">3</button>
-<button class="key" type="button" data-key="4">4</button><button class="key" type="button" data-key="5">5</button><button class="key" type="button" data-key="6">6</button>
-<button class="key" type="button" data-key="7">7</button><button class="key" type="button" data-key="8">8</button><button class="key" type="button" data-key="9">9</button>
-<button class="key action" type="button" data-key="C">EFFACER</button><button class="key" type="button" data-key="0">0</button><button class="key action" type="button" data-key="B">⌫</button>
-</div>
-<button id="saveManual" class="primary" type="button" style="width:100%">ENREGISTRER LE TEMPS MANUEL</button>
-<div class="three" style="margin-top:10px"><button id="prevPoint" type="button">◀ PRÉC.</button><button id="nextPoint" type="button" class="primary">SUIVANT ▶</button><button id="resetCourse" type="button">RAZ</button></div><button id="courseToPrep" type="button" style="width:100%;margin-top:10px">RETOUR PRÉPA</button>
+<div class="three"><button id="prevPoint" type="button">◀ PRÉC.</button><button id="nextPoint" type="button" class="primary">SUIVANT ▶</button><button id="resetCourse" type="button">RAZ</button></div><button id="courseToPrep" type="button" style="width:100%;margin-top:10px">RETOUR PRÉPA</button>
 </div>
 
 <div class="panel"><h2>Historique des tronçons</h2><div id="courseHistory" class="muted">Aucun contrôle.</div></div>
@@ -170,9 +167,30 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px
 
 var KEY="transmaroc_v8_data";
 var days=[{name:"Jour 1",zrs:[]}],activeDay=0;
-var zrs=days[0].zrs,activeZr=0,coursePoint=1,realDigits="",timerRunning=false,timerStart=0,timerElapsed=0,timerInterval=null;
+var zrs=days[0].zrs,activeZr=0,coursePoint=1,timerRunning=false,timerStart=0,timerElapsed=0,timerInterval=null,zrTimerRunning=false,zrTimerStart=0,zrElapsed=0;
 
 function $(id){return document.getElementById(id)}
+function getZrElapsed(){
+  if(!zrTimerRunning)return Math.max(0,Number(zrElapsed)||0);
+  return Math.max(0,(Date.now()-zrTimerStart)/1000);
+}
+function updateZrTimerUI(){
+  var e=getZrElapsed();
+  if($("zrTimerDisplay"))$("zrTimerDisplay").textContent=short(e);
+  if($("zrTimerStatus"))$("zrTimerStatus").textContent=zrTimerRunning?"ZR EN COURS":"ZR terminée / en attente";
+}
+function startZrTimer(){
+  if(zrTimerRunning)return;
+  zrTimerRunning=true;zrTimerStart=Date.now()-zrElapsed*1000;
+}
+function stopZrTimer(){
+  zrElapsed=getZrElapsed();zrTimerRunning=false;
+}
+function getElapsed(){
+  if(!timerRunning) return Math.max(0,Number(timerElapsed)||0);
+  return Math.max(0,(Date.now()-timerStart)/1000);
+}
+
 function num(v){return parseFloat(String(v).replace(",", "."))}
 function fmt(sec){sec=Math.max(0,Math.round(sec));var h=Math.floor(sec/3600);sec%=3600;var m=Math.floor(sec/60),s=sec%60;return (h?String(h).padStart(2,"0")+":":"")+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")}
 function short(sec){sec=Math.max(0,Math.round(sec));return String(Math.floor(sec/60)).padStart(2,"0")+":"+String(sec%60).padStart(2,"0")}
@@ -225,18 +243,27 @@ function load(){
   zrs=days[activeDay].zrs;
   activeZr=Math.min(Math.max(activeZr,0),Math.max(zrs.length-1,0));
 }
+function nextLocalZRNumber(){
+  var n=1;
+  while(zrs.some(function(z){
+    var m=String(z.name||"").trim().match(/^ZR\s*(\d+)$/i);
+    return m && Number(m[1])===n;
+  })) n++;
+  return n;
+}
 function switchDay(i){
   i=Number(i);
   if(!days[i])return;
   if(timerRunning){
     timerRunning=false;
-    if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
+    if(timerInterval){if(timerInterval){clearInterval(timerInterval);timerInterval=null;}}
   }
   activeDay=i;
   zrs=days[i].zrs;
   activeZr=Math.min(activeZr,Math.max(zrs.length-1,0));
-  coursePoint=1;realDigits="";timerElapsed=0;
+  coursePoint=1;timerElapsed=0;
   save();renderAll();
+  if($("newZrName"))$("newZrName").value="ZR "+nextLocalZRNumber();
 }
 function renderDays(){
   var s=$("daySelect");
@@ -277,31 +304,91 @@ var idx=Number($("courseZr").value),z=zrs[idx],rs=rows(z),r=rs[coursePoint-1];
 var sel=$("coursePointSelect");
 sel.innerHTML=rs.map(function(x){return '<option value="'+x.i+'">Tronçon '+x.i+' · '+x.d.toFixed(2)+' km · '+short(x.t)+'</option>'}).join("");
 if(rs.length){coursePoint=Math.min(Math.max(coursePoint,1),rs.length);sel.value=String(coursePoint)}
+if($("courseZrStart")) $("courseZrStart").value=(z&&z.start)||"10:00:00";
 $("pointNo").textContent=rs.length?coursePoint:0;
 $("targetDist").textContent=r?r.d.toFixed(2)+" km":"—";
 $("targetSegTime").textContent=r?short(r.t):"—";
 $("targetTime").textContent=r?fmt(r.ct):"—";
+var liveSeg=timerRunning?getElapsed():timerElapsed;
+$("realSegTime").textContent=(liveSeg>0)?short(liveSeg):"—";
+var latest=getLatestHistory(z);
+var cumReal=0;
+// Le cumul réel = somme des tronçons terminés + le tronçon courant
+// uniquement pendant qu'il tourne. Une fois arrêté, on utilise son
+// temps enregistré, sans le compter une deuxième fois.
+for(var cj=1;cj<coursePoint;cj++){
+  if(latest[cj]) cumReal+=Number(latest[cj].real)||0;
+}
+if(timerRunning){
+  cumReal+=liveSeg;
+}else if(latest[coursePoint]){
+  cumReal+=Number(latest[coursePoint].real)||0;
+}
+$("realCumTime").textContent=(cumReal>0)?fmt(cumReal):"—";
+updateZrTimerUI();
 $("courseNote").textContent=r?(r.note||""):"Prépare d'abord la ZR.";
 if(!timerRunning) $("timerDisplay").textContent=short(timerElapsed);
 calcCourse();
 renderHistory();
 }
-function calcCourse(){
-var idx=Number($("courseZr").value),z=zrs[idx],r=rows(z)[coursePoint-1],light=$("statusLight");
-light.className="statusLight neutral";light.textContent="—";
-var real=timerRunning?getElapsed():timerElapsed;
-if(!r||real<=0){$("courseDelta").textContent="—";$("courseStatus").textContent=timerRunning?"CHRONO EN COURS":"Prêt à démarrer";return}
-var d=real-r.t,a=Math.abs(d);
-$("courseDelta").textContent=deltaFmt(d);
-if(a<=5){light.className="statusLight green";light.textContent="BON";$("courseStatus").textContent=d===0?"À L'HEURE":"LÉGER RETARD"}
-else if(d>0&&a<=15){light.className="statusLight orange";light.textContent="ATTENTION";$("courseStatus").textContent="RETARD"}
-else if(d>15){light.className="statusLight red";light.textContent="RETARD";$("courseStatus").textContent="RETARD IMPORTANT"}
-else{light.className="statusLight orange";light.textContent="AVANCE";$("courseStatus").textContent="EN AVANCE"}
+function getLatestHistory(z){
+  var latest={};
+  (z&&z.history||[]).forEach(function(h){
+    if(h&&h.point) latest[h.point]=h;
+  });
+  return latest;
 }
-function getElapsed(){return timerRunning?((Date.now()-timerStart)/1000):timerElapsed}
+function calcCourse(){
+  var idx=Number($("courseZr").value),z=zrs[idx],rs=rows(z),r=rs[coursePoint-1];
+  var light=$("statusLight");
+  light.className="statusLight neutral";light.textContent="—";
+
+  if(!r){
+    $("courseDelta").textContent="—";
+    $("courseDelta").textContent="—";
+    $("nextTarget").textContent="—";
+    $("nextAdvice").textContent="—";
+    $("courseStatus").textContent="Prêt à démarrer";
+    return;
+  }
+
+  var real=timerRunning?getElapsed():timerElapsed;
+  var latest=getLatestHistory(z);
+
+  // Cumul réel : tronçons précédents enregistrés + courant.
+  // Si le courant est arrêté, son enregistrement est déjà la valeur finale.
+  var previousReal=0;
+  for(var j=1;j<coursePoint;j++){
+    if(latest[j]) previousReal+=Number(latest[j].real)||0;
+  }
+
+  var currentReal=timerRunning ? Math.max(0,real)
+                               : (latest[coursePoint] ? Number(latest[coursePoint].real)||0 : Math.max(0,real));
+  var currentCum=previousReal+currentReal;
+  var cumDelta=currentCum-r.ct;
+  var segDelta=real-r.t;
+
+  $("courseDelta").textContent=real>0?deltaFmt(segDelta):"—";
+
+  
+  
+
+  if(real<=0 && previousReal<=0){
+    $("courseStatus").textContent="Prêt à démarrer";
+  }else if(segDelta>0){
+    $("courseStatus").textContent="RETARD SUR LE TRONÇON";
+  }else if(segDelta<0){
+    $("courseStatus").textContent="AVANCE SUR LE TRONÇON";
+  }else{
+    $("courseStatus").textContent="À L'HEURE SUR LE TRONÇON";
+  }
+
+}
 function updateTimerUI(){
 var e=getElapsed();
 $("timerDisplay").textContent=short(e);
+updateZrTimerUI();
+renderCourse();
 calcCourse();
 }
 function startTimer(){
@@ -309,14 +396,15 @@ if(timerRunning)return;
 var z=zrs[Number($("courseZr").value)],r=rows(z)[coursePoint-1];
 if(!r){$("courseStatus").textContent="Aucun tronçon";return}
 timerRunning=true;timerStart=Date.now()-timerElapsed*1000;
+if(coursePoint===1 && !zrTimerRunning && zrElapsed===0)startZrTimer();
 $("startTimer").style.display="none";$("stopNextTimer").style.display="block";
 $("courseStatus").textContent="CHRONO EN COURS";
-timerInterval=setInterval(updateTimerUI,200);
+timerInterval=setInterval(updateTimerUI,200);updateTimerUI();
 }
 function stopTimer(saveIt){
 if(!timerRunning)return;
 timerElapsed=getElapsed();timerRunning=false;
-clearInterval(timerInterval);timerInterval=null;
+if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
 $("startTimer").style.display="block";$("stopNextTimer").style.display="none";
 $("startTimer").textContent="↻ REFAIRE LE CHRONO";
 updateTimerUI();
@@ -334,7 +422,7 @@ if(currentRow) saveCourseTime(elapsed,"chrono");
 if(coursePoint<z.segs.length){
 coursePoint++;
 timerElapsed=0;
-realDigits="";
+
 timerRunning=true;
 timerStart=Date.now();
 $("startTimer").style.display="none";
@@ -345,6 +433,7 @@ renderCourse();
 }else{
 timerElapsed=elapsed;
 timerRunning=false;
+stopZrTimer();
 clearInterval(timerInterval);timerInterval=null;
 $("startTimer").style.display="block";
 $("stopNextTimer").style.display="none";
@@ -360,13 +449,23 @@ z.history=z.history||[];
 z.history.push({point:coursePoint,target:r.t,real:Math.round(real),delta:Math.round(real-r.t),source:source});
 save();renderHistory();
 }
-function renderHistory(){var z=zrs[Number($("courseZr").value)],h=z&&z.history||[];$("courseHistory").innerHTML=h.length?h.slice().reverse().map(function(x){return '<div style="padding:7px 0;border-bottom:1px solid #e5e7eb">Tronçon '+x.point+' · cible '+fmt(x.target)+' · réel '+fmt(x.real)+' · <strong>'+deltaFmt(x.delta)+'</strong></div>'}).join(""):"Aucun contrôle."}
+function renderHistory(){
+  var z=zrs[Number($("courseZr").value)],h=z&&z.history||[];
+  if(!h.length){$("courseHistory").innerHTML="Aucun contrôle.";return}
+  var ordered=h.slice().sort(function(a,b){return a.point-b.point});
+  var cum=0;
+  $("courseHistory").innerHTML=ordered.map(function(x){
+    cum+=(Number(x.real)||0);
+    var cd=cum-(ordered.slice(0,ordered.indexOf(x)+1).reduce(function(a,y){return a+(Number(y.target)||0)},0));
+    return '<div style="padding:7px 0;border-bottom:1px solid #e5e7eb">Tronçon '+x.point+' · cible '+fmt(x.target)+' · réel '+fmt(x.real)+' · tronçon <strong>'+deltaFmt(x.delta)+'</strong> · cumulé <strong>'+deltaFmt(cd)+'</strong></div>';
+  }).join("");
+}
 function renderAll(){renderDays();renderSelectors();renderTable();renderList();renderCourse()}
 function tab(name){$("prep").classList.toggle("hidden",name!=="prep");$("course").classList.toggle("hidden",name!=="course");$("delta").classList.toggle("hidden",name!=="delta");$("tabPrep").classList.toggle("primary",name==="prep");$("tabCourse").classList.toggle("primary",name==="course");$("tabDelta").classList.toggle("primary",name==="delta");if(name==="course")renderCourse()}
 
 $("addZr").addEventListener("click",function(){
 var rawName=$("newZrName").value.trim();
-var start=$("newZrStart").value.trim()||"10:00:00";
+var start="10:00:00";
 var match=rawName.match(/^ZR\s*(\d+)$/i);
 var name=rawName||("ZR "+(zrs.length+1));
 
@@ -385,14 +484,9 @@ if(match){
 }
 zrs.push({id:"zr_"+Date.now()+"_"+Math.random().toString(36).slice(2),name:name,start:start,segs:[],history:[]});
 activeZr=zrs.length-1;
-coursePoint=1;
+coursePoint=1;zrTimerRunning=false;zrElapsed=0;zrTimerStart=0;
 $("zrMsg").textContent="✓ "+name+" créée";
-var n=1;
-while(zrs.some(function(z){
-  var m=String(z.name).trim().match(/^ZR\s*(\d+)$/i);
-  return m && Number(m[1])===n;
-})) n++;
-$("newZrName").value="ZR "+n;
+$("newZrName").value="ZR "+nextLocalZRNumber();
 save();renderAll();
 });
 $("addSeg").addEventListener("click",function(){
@@ -403,73 +497,38 @@ z.segs.push({d:d,s:s,note:note});$("segDist").value="";$("segSpeed").value="";$(
 save();renderAll();$("segDist").focus();
 });
 $("zrSelect").addEventListener("change",function(){activeZr=Number(this.value);coursePoint=1;save();renderAll()});
-$("courseZr").addEventListener("change",function(){activeZr=Number(this.value);coursePoint=1;realDigits="";updateDisplay();save();renderCourse()});
+$("courseZr").addEventListener("change",function(){
+  activeZr=Number(this.value);coursePoint=1;timerElapsed=0;
+  timerRunning=false;zrTimerRunning=false;zrTimerStart=0;zrElapsed=0;
+  if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
+  updateDisplay();save();renderCourse();updateZrTimerUI();
+});
+$("courseZrStart").addEventListener("change",function(){
+  var z=zrs[Number($("courseZr").value)];
+  if(!z)return;
+  z.start=this.value||"10:00:00";
+  save();renderList();renderCourse();
+});
 $("tabPrep").addEventListener("click",function(){tab("prep")});
 $("tabCourse").addEventListener("click",function(){tab("course")});
 $("tabDelta").addEventListener("click",function(){tab("delta")});
 $("courseToPrep").addEventListener("click",function(){tab("prep")});
 
-document.querySelectorAll("#keypad [data-key]").forEach(function(b){
-b.addEventListener("click",function(){
-if(timerRunning)return;
-var k=b.getAttribute("data-key");
-if(k==="C")realDigits="";
-else if(k==="B")realDigits=realDigits.slice(0,-1);
-else if(realDigits.length<4)realDigits+=k;
-updateManualDisplay();
-});
-});
-function updateManualDisplay(){
-if(realDigits.length===0)$("realDisplay").textContent="--:--";
-else if(realDigits.length<3)$("realDisplay").textContent=realDigits.padStart(2,"0")+":--";
-else $("realDisplay").textContent=realDigits.slice(0,2)+":"+realDigits.slice(2).padStart(2,"0");
-}
-$("coursePointSelect").addEventListener("change",function(){
-if(timerRunning)stopTimer(false);
-coursePoint=Number(this.value)||1;
-realDigits="";timerElapsed=0;
-$("startTimer").textContent="▶ DÉMARRER LE CHRONO";
-$("startTimer").style.display="block";$("stopNextTimer").style.display="none";
-save();renderCourse();
-});
-$("startTimer").addEventListener("click",function(){startTimer()});
-$("stopNextTimer").addEventListener("click",function(){stopAndStartNext()});
-$("saveManual").addEventListener("click",function(){
-if(timerRunning)return;
-if(realDigits.length!==4)return;
-var m=Number(realDigits.slice(0,2)),s=Number(realDigits.slice(2,4));
-if(s>59)return;
-var real=m*60+s;timerElapsed=real;
-$("timerDisplay").textContent=short(real);
-saveCourseTime(real,"manuel");
-calcCourse();
-});
-$("nextPoint").addEventListener("click",function(){});
-$("nextPoint").addEventListener("click",function(){
-if(timerRunning)stopTimer(false);
-var z=zrs[Number($("courseZr").value)];
-if(z&&coursePoint<z.segs.length){
-coursePoint++;realDigits="";timerElapsed=0;
-$("startTimer").textContent="▶ DÉMARRER LE CHRONO";
-$("startTimer").style.display="block";$("stopNextTimer").style.display="none";
-save();renderCourse();
-}
-});
 $("prevPoint").addEventListener("click",function(){
 if(timerRunning)stopTimer(false);
-if(coursePoint>1){coursePoint--;timerElapsed=0;realDigits="";$("startTimer").textContent="▶ DÉMARRER LE CHRONO";$("startTimer").style.display="block";$("stopNextTimer").style.display="none";updateManualDisplay();save();renderCourse()}
+if(coursePoint>1){coursePoint--;timerElapsed=0;$("startTimer").textContent="▶ DÉMARRER LE CHRONO";$("startTimer").style.display="block";$("stopNextTimer").style.display="none";updateManualDisplay();save();renderCourse()}
 });
 $("resetCourse").addEventListener("click",function(){
 if(timerRunning)stopTimer(false);
 var z=zrs[Number($("courseZr").value)];if(z)z.history=[];
-coursePoint=1;timerElapsed=0;realDigits="";
+coursePoint=1;timerElapsed=0;
 $("startTimer").textContent="▶ DÉMARRER LE CHRONO";
 $("startTimer").style.display="block";$("stopNextTimer").style.display="none";
 updateManualDisplay();save();renderCourse();
 });
 $("courseZr").addEventListener("change",function(){
 if(timerRunning)stopTimer(false);
-activeZr=Number(this.value);coursePoint=1;realDigits="";timerElapsed=0;
+activeZr=Number(this.value);coursePoint=1;timerElapsed=0;
 $("startTimer").textContent="▶ DÉMARRER LE CHRONO";
 $("startTimer").style.display="block";$("stopNextTimer").style.display="none";
 save();renderCourse();
@@ -488,7 +547,7 @@ $("zrList").addEventListener("click",function(ev){
     var sid=btn.getAttribute("data-select-zr-id");
     var si=zrs.findIndex(function(z){return z.id===sid});
     if(si<0)return;
-    activeZr=si;coursePoint=1;timerElapsed=0;realDigits="";
+    activeZr=si;coursePoint=1;timerElapsed=0;
     save();renderAll();return;
   }
 
@@ -508,7 +567,7 @@ $("zrList").addEventListener("click",function(ev){
     else if(activeZr>di) activeZr--;
     else if(activeZr===di) activeZr=Math.min(di,zrs.length-1);
 
-    coursePoint=1;realDigits="";timerElapsed=0;
+    coursePoint=1;timerElapsed=0;
     save();renderAll();
     var msg=document.getElementById("zrMsg");
     if(msg)msg.textContent="✓ "+deletedName+" supprimée";
@@ -533,11 +592,25 @@ $("zrList").addEventListener("click",function(ev){
 $("daySelect").addEventListener("change",function(){switchDay(this.value);});
 $("addDayBtn").addEventListener("click",function(){
   var n=1;
-  while(days.some(function(d){return String(d.name).toLowerCase()==="jour "+n;}))n++;
-  var newDay={name:"Jour "+n,zrs:[]};
+  while(days.some(function(d){return String(d.name||"").toLowerCase()==="jour "+n;}))n++;
+  var newDay={
+    name:"Jour "+n,
+    zrs:[{
+      id:"zr_"+Date.now()+"_"+Math.random().toString(36).slice(2),
+      name:"ZR 1",
+      start:"08:00:00",
+      segs:[],
+      history:[]
+    }]
+  };
   days.push(newDay);
-  switchDay(days.length-1);
-  var m=$("dayMsg");if(m)m.textContent="✓ "+newDay.name+" créée";
+  activeDay=days.length-1;
+  zrs=newDay.zrs;
+  activeZr=0;
+  coursePoint=1;timerElapsed=0;
+  save();renderAll();
+  $("newZrName").value="ZR "+nextLocalZRNumber();
+  var m=$("dayMsg");if(m)m.textContent="✓ "+newDay.name+" créée avec ZR 1";
 });
 $("deleteDayBtn").addEventListener("click",function(){
   if(days.length<=1){
@@ -548,12 +621,12 @@ $("deleteDayBtn").addEventListener("click",function(){
   days.splice(activeDay,1);
   activeDay=Math.min(activeDay,days.length-1);
   zrs=days[activeDay].zrs;
-  activeZr=0;coursePoint=1;realDigits="";timerElapsed=0;
+  activeZr=0;coursePoint=1;timerElapsed=0;
   save();renderAll();
   var m=$("dayMsg");if(m)m.textContent="✓ "+deleted+" supprimée";
 });
 
-load();renderAll();
+load();renderAll();if($("newZrName"))$("newZrName").value="ZR "+nextLocalZRNumber();
 })();
 </script>
 </body>
