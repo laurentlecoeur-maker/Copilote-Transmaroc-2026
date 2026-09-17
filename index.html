@@ -119,17 +119,17 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px
 <div class="bigbox zrChronoPanel" style="margin-bottom:10px;border:2px solid #111">
 <div class="zrChronoTitle">⏱️ CHRONO ZR ENTIÈRE</div>
 <div class="zrChronoTimes">
-  <div class="zrTimeBox"><div class="muted">Heure de début ZR</div><strong id="zrStartTime">—</strong></div>
+  <div class="zrTimeBox"><div class="muted">Heure de début ZR</div></div>
   <div class="zrTimerCenter"><div id="zrTimerDisplay" class="value" style="font-size:42px">00:00</div><div id="zrTimerStatus" style="font-weight:800">ZR en attente</div></div>
-  <div class="zrTimeBox"><div class="muted">Heure de fin ZR</div><strong id="zrEndTime">—</strong></div>
+  <div class="zrTimeBox"><div class="muted">Heure de fin ZR</div></div>
 </div>
 </div>
 
-<div class="center muted" style="margin-top:10px;font-size:20px">TRONÇON <strong id="pointNo">—</strong></div>
+<div class="center muted" style="margin-top:10px;font-size:20px">TRONÇON </div>
 <div class="panel" style="margin-top:10px"><div class="muted" style="font-weight:800">TEMPS PAR TRONÇON</div><div id="segmentTimes"></div></div>
 <div class="courseTop" style="margin-top:10px">
-<div class="bigbox">Temps cible tronçon<strong class="value" id="targetSegTime">—</strong><div class="muted">Temps réel tronçon : <strong id="realSegTime">—</strong></div></div>
-<div class="bigbox">Temps cible cumulé<strong class="value" id="targetTime">—</strong><div class="muted">Temps réel cumulé : <strong id="realCumTime">—</strong></div></div>
+<div class="bigbox">Temps cible tronçon<div class="muted">Temps réel tronçon : </div></div>
+<div class="bigbox">Temps cible cumulé<div class="muted">Temps réel cumulé : </div></div>
 </div>
 
 <div id="courseNote" class="center muted" style="margin:9px 0"></div>
@@ -142,9 +142,9 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px
 <button id="startTimer" class="primary" type="button" style="width:100%;font-size:25px;min-height:82px;margin-top:12px">▶ DÉMARRER LE CHRONO</button>
 <button id="stopNextTimer" type="button" class="primary" style="width:100%;font-size:23px;min-height:82px;margin-top:10px;display:none">⏱ STOP + ENREGISTRER + TRONÇON SUIVANT ▶</button>
 
-<div id="statusLight" class="statusLight neutral">—</div>
-<div class="center muted" style="margin-top:8px">Écart du tronçon</div><div id="courseDelta" class="delta">—</div>
-<div id="courseStatus" class="courseStatus">Prêt à démarrer</div><div class="center muted" style="margin-top:7px">À la fin d’un tronçon : 1 appui = arrêt, enregistrement et passage immédiat au suivant.</div>
+
+<div class="center muted" style="margin-top:8px">Écart du tronçon</div>
+<div id="courseStatus" class="courseStatus">Prêt à démarrer</div>
 </div>
 
 <div class="panel">
@@ -161,7 +161,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px
 <label>Temps road-book<input id="freeRb" inputmode="numeric" placeholder="07:30"></label>
 <label>Temps réel<input id="freeReal" inputmode="numeric" placeholder="07:42"></label>
 </div>
-<div class="center" style="margin-top:15px"><div class="muted">Écart</div><div id="freeOut" class="delta">—</div><div id="freeStatus" class="courseStatus">—</div></div>
+<div class="center" style="margin-top:15px"><div class="muted">Écart</div></div>
 </div>
 </section>
 </div>
@@ -368,17 +368,17 @@ function renderCourse(){
   if($("zrEndTime"))$("zrEndTime").textContent=(z&&z.actualEnd)||"—";
   $("pointNo").textContent=rs.length?coursePoint:"—";
   $("targetDist").textContent=r?r.d.toFixed(2)+" km":"—";
-  $("targetSegTime").textContent=r?short(r.t):"—";
-  $("targetTime").textContent=r?fmt(r.ct):"—";
+  
+  
 
   var liveSeg=timerRunning?getElapsed():timerElapsed;
-  $("realSegTime").textContent=liveSeg>0?short(liveSeg):"—";
+  
 
   var latest=getLatestHistory(z),cumReal=0;
   for(var cj=1;cj<coursePoint;cj++)if(latest[cj])cumReal+=Number(latest[cj].real)||0;
   if(timerRunning)cumReal+=liveSeg;
   else if(latest[coursePoint])cumReal+=Number(latest[coursePoint].real)||0;
-  $("realCumTime").textContent=cumReal>0?fmt(cumReal):"—";
+  
 
   updateZrTimerUI();
   $("courseNote").textContent=r?(r.note||""):(rs.length?"":"Définis d'abord les tronçons dans l'onglet PRÉPARATION.");
