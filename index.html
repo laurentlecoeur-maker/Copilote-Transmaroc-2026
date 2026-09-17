@@ -109,7 +109,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px
 <label style="display:block;margin-top:10px">Heure de départ ZR<input id="courseZrStart" type="time" step="1"></label>
 
 <div class="bigbox" style="margin-bottom:10px;border:2px solid #111">
-<div class="muted">⏱️ CHRONO ZR ENTIÈRE</div>
+<div class="muted">⏱️ CHRONO ZR ENTIÈRE</div><div id="zrEndTime" class="small muted">Heure de fin ZR : —</div>
 <div id="zrTimerDisplay" class="value" style="font-size:42px">00:00</div>
 <div id="zrTimerStatus" style="font-weight:800">ZR en attente</div>
 </div>
@@ -167,7 +167,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px
 
 var KEY="transmaroc_v8_data";
 var days=[{name:"Jour 1",zrs:[]}],activeDay=0;
-var zrs=days[0].zrs,activeZr=0,coursePoint=1,timerRunning=false,timerStart=0,timerElapsed=0,timerInterval=null,zrTimerRunning=false,zrTimerStart=0,zrElapsed=0;
+var zrs=days[0].zrs,activeZr=0,coursePoint=1,timerRunning=false,timerStart=0,timerElapsed=0,timerInterval=null,zrTimerRunning=false,zrTimerStart=0,zrElapsed=0,zrEndTime='';
 
 function $(id){return document.getElementById(id)}
 function getZrElapsed(){
@@ -626,18 +626,16 @@ $("deleteDayBtn").addEventListener("click",function(){
   var m=$("dayMsg");if(m)m.textContent="✓ "+deleted+" supprimée";
 });
 
+$("startTimer").addEventListener("click",function(e){
+  e.preventDefault();
+  startTimer();
+});
+$("stopNextTimer").addEventListener("click",function(e){
+  e.preventDefault();
+  stopAndStartNext();
+});
 load();renderAll();if($("newZrName"))$("newZrName").value="ZR "+nextLocalZRNumber();
 })();
 </script>
 </body>
 </html>
-
-document.addEventListener('DOMContentLoaded',function(){
-  var b=document.getElementById('startTimerBtn');
-  if(b){
-    b.addEventListener('click',function(e){
-      e.preventDefault();
-      if(typeof timerRunning!=='undefined' && timerRunning) stopTimer(); else startTimer();
-    });
-  }
-});
