@@ -43,7 +43,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px
 </head>
 <body>
 <div class="app">
-<h1>Copilote TransMaroc </h1>
+<h1>🏁 COPILOTE TRANSMAROC 2026</h1>
 <div class="sub">Plusieurs ZR par journée · préparation complète puis mode Course.</div>
 
 <div class="tabs">
@@ -518,18 +518,6 @@ z.segs.push({d:d,s:s,note:note});$("segDist").value="";$("segSpeed").value="";$(
 save();renderAll();$("segDist").focus();
 });
 $("zrSelect").addEventListener("change",function(){activeZr=Number(this.value);coursePoint=1;save();renderAll()});
-$("courseZr").addEventListener("change",function(){
-  activeZr=Number(this.value);coursePoint=1;timerElapsed=0;
-  timerRunning=false;zrTimerRunning=false;zrTimerStart=0;zrElapsed=0;
-  if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
-  updateDisplay();save();renderCourse();updateZrTimerUI();
-});
-$("courseZrStart").addEventListener("change",function(){
-  var z=zrs[Number($("courseZr").value)];
-  if(!z)return;
-  z.start=this.value||"10:00:00";
-  save();renderList();renderCourse();
-});
 $("tabPrep").addEventListener("click",function(){tab("prep")});
 $("tabCourse").addEventListener("click",function(){tab("course")});
 $("tabDelta").addEventListener("click",function(){tab("delta")});
