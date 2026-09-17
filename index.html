@@ -125,6 +125,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px
     </div>
     <div class="zrTimerCenter">
       <div id="zrTimerDisplay" style="font-size:48px;font-weight:900;line-height:1.1">00:00</div>
+      <div id="zrDelta" style="margin-top:6px;font-size:22px;font-weight:900">ÉCART ZR : —</div>
     </div>
     <div class="zrTimeBox">
       <div class="muted">HEURE DE FIN ZR</div>
@@ -349,6 +350,32 @@ function renderSegmentTimes(z,rs){
   }).join("");
 }
 
+function updateZrDelta(z,rs){
+  var el=$("zrDelta");
+  if(!el)return;
+  if(!z || !rs.length){
+    el.textContent="ÉCART ZR : —";
+    return;
+  }
+  var latest=getLatestHistory(z);
+  var target=0, real=0, completed=0;
+  rs.forEach(function(x){
+    target += Number(x.t)||0;
+    if(latest[x.i]){
+      real += Number(latest[x.i].real)||0;
+      completed++;
+    }
+  });
+
+  // The ZR-wide delta is meaningful once the whole ZR is completed.
+  if(completed===rs.length && real>=0){
+    var d=real-target;
+    el.textContent="ÉCART ZR : "+signedFmt(d)+" "+(d<0?"(avance)":d>0?"(retard)":"(à l'heure)");
+  }else{
+    el.textContent="ÉCART ZR : —";
+  }
+}
+
 function renderCourse(){
   var sel=$("courseZr");
   if(!sel)return;
@@ -363,6 +390,7 @@ function renderCourse(){
   var r=rs.length?rs[coursePoint-1]:null;
 
   renderSegmentTimes(z,rs);
+  updateZrDelta(z,rs);
 
   var pointSel=$("coursePointSelect");
   if(pointSel){
@@ -394,6 +422,7 @@ function renderCourse(){
   calcCourse();
   renderHistory();
   renderSegmentTimes(z,rs);
+  updateZrDelta(z,rs);
 }
 
 function getLatestHistory(z){
