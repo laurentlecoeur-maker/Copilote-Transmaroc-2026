@@ -40,6 +40,19 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px
 .zrTimerCenter{text-align:center}
 @media(max-width:700px){.zrChronoTimes{grid-template-columns:1fr}.zrTimerCenter{order:-1}.zrTimeBox strong{font-size:28px}}
 </style>
+
+<style id="course-v45-style">
+#course{padding:10px 14px 24px}.sectionTitle{background:#203e5d;color:#fff;border-radius:12px 12px 0 0;padding:16px 22px;font-size:30px;font-weight:900}
+.courseSelector select{width:100%;box-sizing:border-box;border:2px solid #aab4c2;border-radius:0 0 12px 12px;background:#fff;padding:18px 24px;font-size:28px;font-weight:900;text-align:center}
+.zrChronoPanel{margin-top:14px;border:1px solid #d5dbe3;border-radius:14px;background:#fff;display:grid;grid-template-columns:1fr 1.35fr 1fr;align-items:center;min-height:175px}
+.zrTime{text-align:center;padding:20px}.zrTime+.zrChrono{border-left:1px solid #d5dbe3;border-right:1px solid #d5dbe3}.label{font-size:20px;color:#53667b}.timeValue{font-size:35px;font-weight:900;margin-top:8px}
+.zrChrono{text-align:center;padding:18px}.chronoTitle{font-size:27px;font-weight:900}.zrTimerValue{font-size:56px;font-weight:900;line-height:1.05;margin-top:8px}.zrDelta{font-size:21px;font-weight:900;margin-top:7px}
+.resultPanel{margin-top:14px;border:1px solid #c9dff4;border-radius:14px;background:#eef7ff;padding:14px}.resultTitle{font-size:25px;font-weight:900;margin:4px 8px 12px}.resultGrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}.resultBox,.resultDeltaBox{background:#fff;border-radius:12px;padding:18px;text-align:center}.resultValue{font-size:39px;font-weight:900;margin-top:6px}.resultDeltaBox{border:1px solid #ffc4c4}.resultDeltaValue{font-size:38px;font-weight:900;margin-top:6px}.resultStatus{font-size:19px;font-weight:900}
+.segmentPanel{margin-top:14px;border:1px solid #d5dbe3;border-radius:14px;overflow:hidden;background:#fff}.segmentTitle{background:#203e5d;color:#fff;padding:16px 20px;font-size:27px;font-weight:900}.segmentHeader,#segmentTimes>div{display:grid;grid-template-columns:.45fr 1fr 1fr 1.35fr;align-items:center;text-align:center}.segmentHeader{background:#f2f4f7;font-weight:900;font-size:20px;padding:13px 8px}#segmentTimes>div{min-height:62px;border-top:1px solid #e1e5ea;font-size:21px;font-weight:700}#segmentTimes>div.current{background:#e5f8eb}#segmentTimes .advance{color:#0a8f3d}#segmentTimes .delay{color:#e11}
+.courseActions{display:grid;grid-template-columns:1fr 1fr .8fr;gap:14px;margin-top:16px}.courseActions button{min-height:88px;border-radius:14px;border:0;font-size:23px;font-weight:900}.btnStart{background:#0a9b4a;color:#fff}.btnStop{background:#ed2424;color:#fff}.btnReset{background:#fff;border:2px solid #d2d8df!important;color:#30465d}
+@media(max-width:700px){#course .sectionTitle{font-size:24px}.zrChronoPanel{grid-template-columns:1fr;min-height:0}.zrTime+.zrChrono{border-left:0;border-right:0;border-top:1px solid #d5dbe3;border-bottom:1px solid #d5dbe3}.resultGrid{grid-template-columns:1fr}.segmentHeader,#segmentTimes>div{grid-template-columns:.35fr .9fr .9fr 1.2fr;font-size:16px}.segmentTitle{font-size:23px}.courseActions{grid-template-columns:1fr;gap:9px}.courseActions button{min-height:72px}}
+</style>
+
 </head>
 <body>
 <div class="app">
@@ -112,56 +125,51 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px
 </div>
 </section>
 
-<section id="course" class="hidden">
-<div class="panel">
-<label>ZR en course<select id="courseZr"></select></label>
 
-<div class="panel" style="margin-top:10px">
-  <div class="muted center" style="font-weight:800;font-size:20px">⏱️ CHRONO ZR ENTIÈRE</div>
-  <div class="zrChronoTimes" style="margin-top:10px">
-    <div class="zrTimeBox">
-      <div class="muted">HEURE DE DÉBUT ZR</div>
-      <strong id="zrStartTime">—</strong>
+<section id="course">
+  <div class="sectionTitle">ZR EN COURS</div>
+  <div class="courseSelector"><select id="courseZr"></select></div>
+
+  <div class="zrChronoPanel">
+    <div class="zrTime">
+      <div class="label">Heure de début ZR</div>
+      <div id="zrStartTime" class="timeValue">—</div>
     </div>
-    <div class="zrTimerCenter">
-      <div id="zrTimerDisplay" style="font-size:48px;font-weight:900;line-height:1.1">00:00</div>
-      <div id="zrDelta" style="margin-top:6px;font-size:22px;font-weight:900">ÉCART ZR : —</div>
+    <div class="zrChrono">
+      <div class="chronoTitle">⏱️ CHRONO ZR ENTIÈRE</div>
+      <div id="zrTimerDisplay" class="zrTimerValue">00:00</div>
+      <div id="zrDelta" class="zrDelta">ÉCART ZR : —</div>
     </div>
-    <div class="zrTimeBox">
-      <div class="muted">HEURE DE FIN ZR</div>
-      <strong id="zrEndTime">—</strong>
+    <div class="zrTime">
+      <div class="label">Heure de fin ZR</div>
+      <div id="zrEndTime" class="timeValue">—</div>
     </div>
   </div>
-</div>
 
+  <div class="resultPanel">
+    <div class="resultTitle">🎯 RÉSULTAT ZR</div>
+    <div class="resultGrid">
+      <div class="resultBox"><div class="label">Temps cible ZR</div><div id="zrTargetResult" class="resultValue">—</div></div>
+      <div class="resultBox"><div class="label">Temps réel ZR</div><div id="zrRealResult" class="resultValue">—</div></div>
+      <div id="zrResultDeltaBox" class="resultDeltaBox">
+        <div class="label">Écart ZR</div><div id="zrResultDelta" class="resultDeltaValue">—</div><div id="zrResultStatus" class="resultStatus"></div>
+      </div>
+    </div>
+  </div>
 
-<div class="center muted" style="margin-top:10px;font-size:20px">TRONÇON </div>
+  <div class="segmentPanel">
+    <div class="segmentTitle">TEMPS PAR TRONÇON</div>
+    <div class="segmentHeader"><span>#</span><span>Temps cible</span><span>Temps réel</span><span>Écart (avance/retard)</span></div>
+    <div id="segmentTimes"></div>
+  </div>
 
-<div class="courseTop" style="margin-top:10px">
-<div class="bigbox">Temps cible tronçon</div>
-<div class="bigbox">Temps cible cumulé</div>
-</div>
-
-<div id="courseNote" class="center muted" style="margin:9px 0"></div>
-
-<div class="bigbox" style="margin-top:10px">
-<div class="muted">CHRONO DU TRONÇON</div>
-<div id="timerDisplay" class="value" style="font-size:44px">00:00</div>
-</div>
-
-<button id="startTimer" class="primary" type="button" style="width:100%;font-size:25px;min-height:82px;margin-top:12px">▶ DÉMARRER LE CHRONO</button>
-<button id="stopNextTimer" type="button" class="primary" style="width:100%;font-size:23px;min-height:82px;margin-top:10px;display:none">⏱ STOP + ENREGISTRER + TRONÇON SUIVANT ▶</button>
-
-
-<div id="courseStatus" class="courseStatus"></div>
-</div>
-
-<div class="panel">
-<div class="three"><button id="prevPoint" type="button">◀ PRÉC.</button><button id="nextPoint" type="button" class="primary">SUIVANT ▶</button><button id="resetCourse" type="button">RAZ</button></div><button id="courseToPrep" type="button" style="width:100%;margin-top:10px">RETOUR PRÉPA</button>
-</div>
-
-<div class="panel"><h2>Historique des tronçons</h2><div id="courseHistory" class="muted">Aucun contrôle.</div></div>
+  <div class="courseActions">
+    <button id="startTimer" class="btnStart">▶ DÉMARRER LE CHRONO</button>
+    <button id="stopNextTimer" class="btnStop">■ ARRÊTER / SUIVANT</button>
+    <button id="resetTimer" class="btnReset">↻ RÉINITIALISER</button>
+  </div>
 </section>
+
 
 <section id="delta" class="hidden">
 <div class="panel">
@@ -329,53 +337,16 @@ container.innerHTML=zrs.map(function(z,i){
 save();
 }
 function renderSegmentTimes(z,rs){
-  var el=$("segmentTimes");
-  if(!el)return;
+  var el=$("segmentTimes"); if(!el)return;
   var latest=getLatestHistory(z);
-  if(!rs.length){
-    el.innerHTML='<div class="muted" style="margin-top:7px">Aucun tronçon défini.</div>';
-    return;
-  }
+  if(!rs.length){el.innerHTML="";return;}
   el.innerHTML=rs.map(function(x){
-    var h=latest[x.i];
-    var real=h ? Number(h.real)||0 : 0;
-    var delta=h ? Number(h.delta)||0 : null;
-    var current=(x.i===coursePoint);
-    return '<div style="display:grid;grid-template-columns:1fr auto auto auto;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid #e5e7eb;font-size:18px;'+(current?'font-weight:800':'')+'">'
-      +'<span>Tronçon '+x.i+(current?' ▶':'')+'</span>'
-      +'<span>Cible <strong>'+short(x.t)+'</strong></span>'
-      +'<span>Réel <strong>'+(h?short(real):'—')+'</strong></span>'
-      +'<span>'+(delta===null?'—':deltaFmt(delta))+'</span>'
-      +'</div>';
+    var h=latest[x.i], real=h?Number(h.real)||0:null, delta=h?Number(h.delta)||0:null;
+    var current=x.i===coursePoint, dc=delta===null?"":(delta<0?"advance":delta>0?"delay":"");
+    var dt=delta===null?"—":signedFmt(delta)+" "+(delta<0?"(avance)":delta>0?"(retard)":"(à l'heure)");
+    return '<div class="'+(current?"current ":"")+'"><span>'+(current?"▶ ":"")+x.i+'</span><span>'+short(x.t)+'</span><span>'+(real===null?"—":short(real))+'</span><span class="'+dc+'">'+dt+'</span></div>';
   }).join("");
 }
-
-function updateZrDelta(z,rs){
-  var el=$("zrDelta");
-  if(!el)return;
-  if(!z || !rs.length){
-    el.textContent="ÉCART ZR : —";
-    return;
-  }
-  var latest=getLatestHistory(z);
-  var target=0, real=0, completed=0;
-  rs.forEach(function(x){
-    target += Number(x.t)||0;
-    if(latest[x.i]){
-      real += Number(latest[x.i].real)||0;
-      completed++;
-    }
-  });
-
-  // The ZR-wide delta is meaningful once the whole ZR is completed.
-  if(completed===rs.length && real>=0){
-    var d=real-target;
-    el.textContent="ÉCART ZR : "+signedFmt(d)+" "+(d<0?"(avance)":d>0?"(retard)":"(à l'heure)");
-  }else{
-    el.textContent="ÉCART ZR : —";
-  }
-}
-
 function renderCourse(){
   var sel=$("courseZr");
   if(!sel)return;
@@ -420,6 +391,18 @@ function renderCourse(){
   $("courseNote").textContent=r?(r.note||""):(rs.length?"":"Définis d'abord les tronçons dans l'onglet PRÉPARATION.");
   if(!timerRunning)$("timerDisplay").textContent=short(timerElapsed);
   calcCourse();
+
+  var zrTargetTotal=0,zrRealTotal=0,zrCompleted=0;
+  rs.forEach(function(x){
+    zrTargetTotal+=Number(x.t)||0;
+    if(latest[x.i]){zrRealTotal+=Number(latest[x.i].real)||0;zrCompleted++;}
+  });
+  var zrComplete=(rs.length>0 && zrCompleted===rs.length);
+  if($("zrTargetResult"))$("zrTargetResult").textContent=rs.length?fmt(zrTargetTotal):"—";
+  if($("zrRealResult"))$("zrRealResult").textContent=zrComplete?fmt(zrRealTotal):"—";
+  if($("zrResultDelta"))$("zrResultDelta").textContent=zrComplete?signedFmt(zrRealTotal-zrTargetTotal):"—";
+  if($("zrResultStatus"))$("zrResultStatus").textContent=zrComplete?((zrRealTotal-zrTargetTotal)<0?"AVANCE":(zrRealTotal-zrTargetTotal)>0?"RETARD":"À L'HEURE"):"";
+
   renderHistory();
   renderSegmentTimes(z,rs);
   updateZrDelta(z,rs);
