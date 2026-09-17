@@ -126,7 +126,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px
 </section>
 
 
-<section id="course">
+<section id="course" class="hidden">
   <div class="sectionTitle">ZR EN COURS</div>
   <div class="courseSelector"><select id="courseZr"></select></div>
 
@@ -566,7 +566,7 @@ function renderHistory(){
     return '<div style="padding:7px 0;border-bottom:1px solid #e5e7eb">Tronçon '+x.point+' · cible '+fmt(x.target)+' · réel '+fmt(x.real)+' · tronçon <strong>'+deltaFmt(x.delta)+'</strong> · cumulé <strong>'+deltaFmt(cd)+'</strong></div>';
   }).join("");
 }
-function renderAll(){renderDays();renderSelectors();renderTable();renderList();renderCourse()}
+function renderAll(){renderDays();renderSelectors();renderTable();renderList()}
 function tab(name){$("prep").classList.toggle("hidden",name!=="prep");$("course").classList.toggle("hidden",name!=="course");$("delta").classList.toggle("hidden",name!=="delta");$("tabPrep").classList.toggle("primary",name==="prep");$("tabCourse").classList.toggle("primary",name==="course");$("tabDelta").classList.toggle("primary",name==="delta");if(name==="course")renderCourse()}
 
 $("addZr").addEventListener("click",function(){
