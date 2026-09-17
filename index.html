@@ -30,6 +30,15 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px
 @media(max-width:650px){.grid,.grid3,.courseTop,.stats{grid-template-columns:1fr}.tabs{grid-template-columns:1fr 1fr 1fr}.key{min-height:76px}.app{padding:9px}}
 
 .dayItem{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+
+.zrChronoTitle{text-align:center;font-size:28px;font-weight:500;margin-bottom:10px}
+.zrChronoTimes{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:14px;align-items:center}
+.zrTimeBox{text-align:center}
+.zrTimeBox .muted{font-size:18px;margin-bottom:5px}
+.zrTimeBox strong{display:block;font-size:32px;line-height:1.1;padding:8px;border:1px solid #d1d5db;border-radius:14px}
+.zrTimerCenter{text-align:center}
+@media(max-width:700px){.zrChronoTimes{grid-template-columns:1fr}.zrTimerCenter{order:-1}.zrTimeBox strong{font-size:28px}}
 </style>
 </head>
 <body>
@@ -106,21 +115,17 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px
 <section id="course" class="hidden">
 <div class="panel">
 <label>ZR en course<select id="courseZr"></select></label>
-<label style="display:block;margin-top:10px">Heure de départ ZR<input id="courseZrStart" type="time" step="1"></label>
 
-<div class="bigbox" style="margin-bottom:10px;border:2px solid #111">
-<div class="muted">⏱️ CHRONO ZR ENTIÈRE</div><div id="zrEndTime" class="small muted">Heure de fin ZR : —</div>
-<div id="zrTimerDisplay" class="value" style="font-size:42px">00:00</div>
-<div id="zrTimerStatus" style="font-weight:800">ZR en attente</div>
+<div class="bigbox zrChronoPanel" style="margin-bottom:10px;border:2px solid #111">
+<div class="zrChronoTitle">⏱️ CHRONO ZR ENTIÈRE</div>
+<div class="zrChronoTimes">
+  <div class="zrTimeBox"><div class="muted">Heure de début ZR</div><strong id="zrStartTime">—</strong></div>
+  <div class="zrTimerCenter"><div id="zrTimerDisplay" class="value" style="font-size:42px">00:00</div><div id="zrTimerStatus" style="font-weight:800">ZR en attente</div></div>
+  <div class="zrTimeBox"><div class="muted">Heure de fin ZR</div><strong id="zrEndTime">—</strong></div>
 </div>
-<div class="courseTop" style="margin-top:10px">
-<div class="bigbox">Tronçon<strong class="value" id="pointNo">0</strong></div>
-<div class="bigbox">Distance<strong class="value" id="targetDist">—</strong></div>
 </div>
-<label style="display:block;margin-top:10px">Choisir le tronçon
-<select id="coursePointSelect"></select>
-</label>
 
+<div class="center muted" style="margin-top:10px;font-size:20px">TRONÇON <strong id="pointNo">0</strong></div>
 <div class="courseTop" style="margin-top:10px">
 <div class="bigbox">Temps cible tronçon<strong class="value" id="targetSegTime">—</strong><div class="muted">Temps réel tronçon : <strong id="realSegTime">—</strong></div></div>
 <div class="bigbox">Temps cible cumulé<strong class="value" id="targetTime">—</strong><div class="muted">Temps réel cumulé : <strong id="realCumTime">—</strong></div></div>
@@ -167,7 +172,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px
 
 var KEY="transmaroc_v8_data";
 var days=[{name:"Jour 1",zrs:[]}],activeDay=0;
-var zrs=days[0].zrs,activeZr=0,coursePoint=1,timerRunning=false,timerStart=0,timerElapsed=0,timerInterval=null,zrTimerRunning=false,zrTimerStart=0,zrElapsed=0,zrEndTime='';
+var zrs=days[0].zrs,activeZr=0,coursePoint=1,timerRunning=false,timerStart=0,timerElapsed=0,timerInterval=null,zrTimerRunning=false,zrTimerStart=0,zrElapsed=0,zrStartTime='',zrEndTime='';
 
 function $(id){return document.getElementById(id)}
 function getZrElapsed(){
@@ -181,10 +186,24 @@ function updateZrTimerUI(){
 }
 function startZrTimer(){
   if(zrTimerRunning)return;
-  zrTimerRunning=true;zrTimerStart=Date.now()-zrElapsed*1000;
+  zrTimerRunning=true;
+  zrTimerStart=Date.now()-zrElapsed*1000;
+  zrStartTime=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  var sz=zrs[Number($("courseZr").value)];
+  if(sz) sz.actualStart=zrStartTime;
+  if($("zrStartTime"))$("zrStartTime").textContent=zrStartTime;
+  save();
+  if($("zrEndTime"))$("zrEndTime").textContent="—";
 }
 function stopZrTimer(){
-  zrElapsed=getZrElapsed();zrTimerRunning=false;
+  if(!zrTimerRunning)return;
+  zrElapsed=Math.max(0,(Date.now()-zrTimerStart)/1000);
+  zrTimerRunning=false;
+  zrEndTime=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  var ez=zrs[Number($("courseZr").value)];
+  if(ez) ez.actualEnd=zrEndTime;
+  if($("zrEndTime"))$("zrEndTime").textContent=zrEndTime;
+  save();
 }
 function getElapsed(){
   if(!timerRunning) return Math.max(0,Number(timerElapsed)||0);
@@ -304,7 +323,8 @@ var idx=Number($("courseZr").value),z=zrs[idx],rs=rows(z),r=rs[coursePoint-1];
 var sel=$("coursePointSelect");
 sel.innerHTML=rs.map(function(x){return '<option value="'+x.i+'">Tronçon '+x.i+' · '+x.d.toFixed(2)+' km · '+short(x.t)+'</option>'}).join("");
 if(rs.length){coursePoint=Math.min(Math.max(coursePoint,1),rs.length);sel.value=String(coursePoint)}
-if($("courseZrStart")) $("courseZrStart").value=(z&&z.start)||"10:00:00";
+if($("zrStartTime")) $("zrStartTime").textContent=(z&&z.actualStart)||zrStartTime||"—";
+if($("zrEndTime")) $("zrEndTime").textContent=(z&&z.actualEnd)||zrEndTime||"—";
 $("pointNo").textContent=rs.length?coursePoint:0;
 $("targetDist").textContent=r?r.d.toFixed(2)+" km":"—";
 $("targetSegTime").textContent=r?short(r.t):"—";
@@ -435,6 +455,7 @@ timerElapsed=elapsed;
 timerRunning=false;
 stopZrTimer();
 clearInterval(timerInterval);timerInterval=null;
+$("courseStatus").textContent="ZR TERMINÉE";
 $("startTimer").style.display="block";
 $("stopNextTimer").style.display="none";
 $("startTimer").textContent="✓ ZR TERMINÉE";
