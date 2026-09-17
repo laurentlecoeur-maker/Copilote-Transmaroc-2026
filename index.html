@@ -432,14 +432,10 @@ function getLatestHistory(z){
 }
 function calcCourse(){
   var idx=Number($("courseZr").value),z=zrs[idx],rs=rows(z),r=rs[coursePoint-1];
-  var light=$("statusLight");
-  light.className="statusLight neutral";light.textContent="—";
 
   if(!r){
     $("courseDelta").textContent="—";
     $("courseDelta").textContent="—";
-    $("nextTarget").textContent="—";
-    $("nextAdvice").textContent="—";
     $("courseStatus").textContent="Prêt à démarrer";
     return;
   }
@@ -733,8 +729,6 @@ $("stopNextTimer").addEventListener("click",function(e){
   e.preventDefault();
   stopAndStartNext();
 });
-$("startTimer").addEventListener("click",function(e){e.preventDefault();startTimer();});
-$("stopNextTimer").addEventListener("click",function(e){e.preventDefault();stopAndStartNext();});
 $("resetTimer").addEventListener("click",function(e){e.preventDefault();resetTimer();});
 $("courseZr").addEventListener("change",function(){
   activeZr=Number(this.value)||0;
