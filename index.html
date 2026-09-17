@@ -113,30 +113,32 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px
 </section>
 
 <section id="course" class="hidden">
-<div class="panel zrTiming" style="margin-top:10px">
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:center">
-    <div><div class="muted" style="font-weight:800">HEURE DE DÉBUT ZR</div><div id="zrStartTime" style="font-size:24px;font-weight:900">—</div></div>
-    <div><div class="muted" style="font-weight:800">HEURE DE FIN ZR</div><div id="zrEndTime" style="font-size:24px;font-weight:900">—</div></div>
-  </div>
-</div>
-
 <div class="panel">
 <label>ZR en course<select id="courseZr"></select></label>
 
-<div class="bigbox zrChronoPanel" style="margin-bottom:10px;border:2px solid #111">
-<div class="zrChronoTitle">⏱️ CHRONO ZR ENTIÈRE</div>
-<div class="zrChronoTimes">
-  <div class="zrTimeBox"><div class="muted">Heure de début ZR</div></div>
-  <div class="zrTimerCenter"><div id="zrTimerDisplay" class="value" style="font-size:42px">00:00</div><div id="zrTimerStatus" style="font-weight:800">ZR en attente</div></div>
-  <div class="zrTimeBox"><div class="muted">Heure de fin ZR</div></div>
-</div>
+<div class="panel" style="margin-top:10px">
+  <div class="muted center" style="font-weight:800;font-size:20px">⏱️ CHRONO ZR ENTIÈRE</div>
+  <div class="zrChronoTimes" style="margin-top:10px">
+    <div class="zrTimeBox">
+      <div class="muted">HEURE DE DÉBUT ZR</div>
+      <strong id="zrStartTime">—</strong>
+    </div>
+    <div class="zrTimerCenter">
+      <div id="zrTimerDisplay" style="font-size:48px;font-weight:900;line-height:1.1">00:00</div>
+    </div>
+    <div class="zrTimeBox">
+      <div class="muted">HEURE DE FIN ZR</div>
+      <strong id="zrEndTime">—</strong>
+    </div>
+  </div>
 </div>
 
+
 <div class="center muted" style="margin-top:10px;font-size:20px">TRONÇON </div>
-<div class="panel" style="margin-top:10px"><div class="muted" style="font-weight:800">TEMPS PAR TRONÇON</div><div id="segmentTimes"></div></div>
+
 <div class="courseTop" style="margin-top:10px">
-<div class="bigbox">Temps cible tronçon<div class="muted">Temps réel tronçon : </div></div>
-<div class="bigbox">Temps cible cumulé<div class="muted">Temps réel cumulé : </div></div>
+<div class="bigbox">Temps cible tronçon</div>
+<div class="bigbox">Temps cible cumulé</div>
 </div>
 
 <div id="courseNote" class="center muted" style="margin:9px 0"></div>
@@ -150,8 +152,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px
 <button id="stopNextTimer" type="button" class="primary" style="width:100%;font-size:23px;min-height:82px;margin-top:10px;display:none">⏱ STOP + ENREGISTRER + TRONÇON SUIVANT ▶</button>
 
 
-<div class="center muted" style="margin-top:8px">Écart du tronçon</div>
-<div id="courseStatus" class="courseStatus">Prêt à démarrer</div>
+<div id="courseStatus" class="courseStatus"></div>
 </div>
 
 <div class="panel">
@@ -458,11 +459,11 @@ calcCourse();
 function startTimer(){
 if(timerRunning)return;
 var z=zrs[Number($("courseZr").value)],r=rows(z)[coursePoint-1];
-if(!r){$("courseStatus").textContent="Aucun tronçon";return}
+if(!r){return}
 timerRunning=true;timerStart=Date.now()-timerElapsed*1000;
 if(coursePoint===1 && !zrTimerRunning && zrElapsed===0)startZrTimer();
 $("startTimer").style.display="none";$("stopNextTimer").style.display="block";
-$("courseStatus").textContent="CHRONO EN COURS";
+
 timerInterval=setInterval(updateTimerUI,200);updateTimerUI();
 }
 function stopTimer(saveIt){
@@ -499,7 +500,7 @@ timerElapsed=elapsed;
 timerRunning=false;
 stopZrTimer();
 clearInterval(timerInterval);timerInterval=null;
-$("courseStatus").textContent="ZR TERMINÉE";
+
 $("startTimer").style.display="block";
 $("stopNextTimer").style.display="none";
 $("startTimer").textContent="✓ ZR TERMINÉE";
