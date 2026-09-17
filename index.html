@@ -125,7 +125,8 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px
 </div>
 </div>
 
-<div class="center muted" style="margin-top:10px;font-size:20px">TRONÇON <strong id="pointNo">0</strong></div>
+<div class="center muted" style="margin-top:10px;font-size:20px">TRONÇON <strong id="pointNo">—</strong></div>
+<div class="panel" style="margin-top:10px"><div class="muted" style="font-weight:800">TEMPS PAR TRONÇON</div><div id="segmentTimes"></div></div>
 <div class="courseTop" style="margin-top:10px">
 <div class="bigbox">Temps cible tronçon<strong class="value" id="targetSegTime">—</strong><div class="muted">Temps réel tronçon : <strong id="realSegTime">—</strong></div></div>
 <div class="bigbox">Temps cible cumulé<strong class="value" id="targetTime">—</strong><div class="muted">Temps réel cumulé : <strong id="realCumTime">—</strong></div></div>
@@ -318,39 +319,75 @@ container.innerHTML=zrs.map(function(z,i){
 }).join("");
 save();
 }
+function renderSegmentTimes(z,rs){
+  var el=$("segmentTimes");
+  if(!el)return;
+  var latest=getLatestHistory(z);
+  if(!rs.length){
+    el.innerHTML='<div class="muted" style="margin-top:7px">Aucun tronçon défini.</div>';
+    return;
+  }
+  el.innerHTML=rs.map(function(x){
+    var h=latest[x.i];
+    var real=h ? Number(h.real)||0 : 0;
+    var delta=h ? Number(h.delta)||0 : null;
+    var current=(x.i===coursePoint);
+    return '<div style="display:grid;grid-template-columns:1fr auto auto auto;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid #e5e7eb;font-size:18px;'+(current?'font-weight:800':'')+'">'
+      +'<span>Tronçon '+x.i+(current?' ▶':'')+'</span>'
+      +'<span>Cible <strong>'+short(x.t)+'</strong></span>'
+      +'<span>Réel <strong>'+(h?short(real):'—')+'</strong></span>'
+      +'<span>'+(delta===null?'—':deltaFmt(delta))+'</span>'
+      +'</div>';
+  }).join("");
+}
+
 function renderCourse(){
-var idx=Number($("courseZr").value),z=zrs[idx],rs=rows(z),r=rs[coursePoint-1];
-var sel=$("coursePointSelect");
-sel.innerHTML=rs.map(function(x){return '<option value="'+x.i+'">Tronçon '+x.i+' · '+x.d.toFixed(2)+' km · '+short(x.t)+'</option>'}).join("");
-if(rs.length){coursePoint=Math.min(Math.max(coursePoint,1),rs.length);sel.value=String(coursePoint)}
-if($("zrStartTime")) $("zrStartTime").textContent=(z&&z.actualStart)||zrStartTime||"—";
-if($("zrEndTime")) $("zrEndTime").textContent=(z&&z.actualEnd)||zrEndTime||"—";
-$("pointNo").textContent=rs.length?coursePoint:0;
-$("targetDist").textContent=r?r.d.toFixed(2)+" km":"—";
-$("targetSegTime").textContent=r?short(r.t):"—";
-$("targetTime").textContent=r?fmt(r.ct):"—";
-var liveSeg=timerRunning?getElapsed():timerElapsed;
-$("realSegTime").textContent=(liveSeg>0)?short(liveSeg):"—";
-var latest=getLatestHistory(z);
-var cumReal=0;
-// Le cumul réel = somme des tronçons terminés + le tronçon courant
-// uniquement pendant qu'il tourne. Une fois arrêté, on utilise son
-// temps enregistré, sans le compter une deuxième fois.
-for(var cj=1;cj<coursePoint;cj++){
-  if(latest[cj]) cumReal+=Number(latest[cj].real)||0;
+  var sel=$("courseZr");
+  if(!sel)return;
+  var idx=Number(sel.value);
+  if(!Number.isFinite(idx) || idx<0 || idx>=zrs.length) idx=activeZr||0;
+  activeZr=idx;
+  sel.value=String(idx);
+
+  var z=zrs[idx],rs=rows(z);
+  if(rs.length) coursePoint=Math.min(Math.max(Number(coursePoint)||1,1),rs.length);
+  else coursePoint=1;
+  var r=rs.length?rs[coursePoint-1]:null;
+
+  renderSegmentTimes(z,rs);
+
+  var pointSel=$("coursePointSelect");
+  if(pointSel){
+    pointSel.innerHTML=rs.map(function(x){
+      return '<option value="'+x.i+'">Tronçon '+x.i+' · '+x.d.toFixed(2)+' km · '+short(x.t)+'</option>';
+    }).join("");
+    if(rs.length)pointSel.value=String(coursePoint);
+  }
+
+  if($("zrStartTime"))$("zrStartTime").textContent=(z&&z.actualStart)||"—";
+  if($("zrEndTime"))$("zrEndTime").textContent=(z&&z.actualEnd)||"—";
+  $("pointNo").textContent=rs.length?coursePoint:"—";
+  $("targetDist").textContent=r?r.d.toFixed(2)+" km":"—";
+  $("targetSegTime").textContent=r?short(r.t):"—";
+  $("targetTime").textContent=r?fmt(r.ct):"—";
+
+  var liveSeg=timerRunning?getElapsed():timerElapsed;
+  $("realSegTime").textContent=liveSeg>0?short(liveSeg):"—";
+
+  var latest=getLatestHistory(z),cumReal=0;
+  for(var cj=1;cj<coursePoint;cj++)if(latest[cj])cumReal+=Number(latest[cj].real)||0;
+  if(timerRunning)cumReal+=liveSeg;
+  else if(latest[coursePoint])cumReal+=Number(latest[coursePoint].real)||0;
+  $("realCumTime").textContent=cumReal>0?fmt(cumReal):"—";
+
+  updateZrTimerUI();
+  $("courseNote").textContent=r?(r.note||""):(rs.length?"":"Définis d'abord les tronçons dans l'onglet PRÉPARATION.");
+  if(!timerRunning)$("timerDisplay").textContent=short(timerElapsed);
+  calcCourse();
+  renderHistory();
+  renderSegmentTimes(z,rs);
 }
-if(timerRunning){
-  cumReal+=liveSeg;
-}else if(latest[coursePoint]){
-  cumReal+=Number(latest[coursePoint].real)||0;
-}
-$("realCumTime").textContent=(cumReal>0)?fmt(cumReal):"—";
-updateZrTimerUI();
-$("courseNote").textContent=r?(r.note||""):"Prépare d'abord la ZR.";
-if(!timerRunning) $("timerDisplay").textContent=short(timerElapsed);
-calcCourse();
-renderHistory();
-}
+
 function getLatestHistory(z){
   var latest={};
   (z&&z.history||[]).forEach(function(h){
@@ -538,6 +575,7 @@ updateManualDisplay();save();renderCourse();
 $("courseZr").addEventListener("change",function(){
 if(timerRunning)stopTimer(false);
 activeZr=Number(this.value);coursePoint=1;timerElapsed=0;
+timerRunning=false;zrTimerRunning=false;zrElapsed=0;zrTimerStart=0;
 $("startTimer").textContent="▶ DÉMARRER LE CHRONO";
 $("startTimer").style.display="block";$("stopNextTimer").style.display="none";
 save();renderCourse();
