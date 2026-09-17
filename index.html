@@ -232,6 +232,7 @@ function num(v){return parseFloat(String(v).replace(",", "."))}
 function fmt(sec){sec=Math.max(0,Math.round(sec));var h=Math.floor(sec/3600);sec%=3600;var m=Math.floor(sec/60),s=sec%60;return (h?String(h).padStart(2,"0")+":":"")+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")}
 function short(sec){sec=Math.max(0,Math.round(sec));return String(Math.floor(sec/60)).padStart(2,"0")+":"+String(sec%60).padStart(2,"0")}
 function deltaFmt(d){var sign=d>0?"+":d<0?"−":"±",a=Math.abs(Math.round(d));return sign+String(Math.floor(a/60)).padStart(2,"0")+":"+String(a%60).padStart(2,"0")}
+function signedFmt(d){var sign=d>0?"+":d<0?"−":"±",a=Math.abs(Math.round(d));return sign+String(Math.floor(a/60)).padStart(2,"0")+":"+String(a%60).padStart(2,"0")}
 function rows(z){var cd=0,ct=0;return (z&&z.segs||[]).map(function(x,i){var t=x.d/x.s*3600;cd+=x.d;ct+=t;return {i:i+1,d:x.d,s:x.s,note:x.note||"",t:t,cd:cd,ct:ct}})}
 function current(){return zrs[activeZr]||null}
 function save(){
@@ -346,6 +347,20 @@ function renderSegmentTimes(z,rs){
     var dt=delta===null?"—":signedFmt(delta)+" "+(delta<0?"(avance)":delta>0?"(retard)":"(à l'heure)");
     return '<div class="'+(current?"current ":"")+'"><span>'+(current?"▶ ":"")+x.i+'</span><span>'+short(x.t)+'</span><span>'+(real===null?"—":short(real))+'</span><span class="'+dc+'">'+dt+'</span></div>';
   }).join("");
+}
+function updateZrDelta(z,rs){
+  var el=$("zrDelta");
+  if(!el)return;
+  if(!z || !rs.length){ el.textContent="ÉCART ZR : —"; return; }
+  var latest=getLatestHistory(z),target=0,real=0,completed=0;
+  rs.forEach(function(x){
+    target+=Number(x.t)||0;
+    if(latest[x.i]){real+=Number(latest[x.i].real)||0;completed++;}
+  });
+  if(completed===rs.length){
+    var d=real-target;
+    el.textContent="ÉCART ZR : "+signedFmt(d)+" "+(d<0?"(avance)":d>0?"(retard)":"(à l'heure)");
+  }else el.textContent="ÉCART ZR : —";
 }
 function renderCourse(){
   var sel=$("courseZr");
@@ -519,6 +534,23 @@ $("startTimer").textContent="✓ ZR TERMINÉE";
 updateTimerUI();
 save();
 }
+}
+function resetTimer(){
+  timerRunning=false;
+  if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
+  timerElapsed=0;
+  zrTimerRunning=false;
+  zrElapsed=0;
+  zrStartTime="";
+  zrEndTime="";
+  var z=zrs[Number($("courseZr").value)];
+  if(z){delete z.actualStart;delete z.actualEnd;z.history=[];}
+  coursePoint=1;
+  $("startTimer").style.display="block";
+  $("stopNextTimer").style.display="none";
+  $("startTimer").textContent="▶ DÉMARRER LE CHRONO";
+  updateTimerUI();
+  save();
 }
 function saveCourseTime(real,source){
 var z=zrs[Number($("courseZr").value)],r=rows(z)[coursePoint-1];
@@ -701,62 +733,20 @@ $("stopNextTimer").addEventListener("click",function(e){
   e.preventDefault();
   stopAndStartNext();
 });
+$("startTimer").addEventListener("click",function(e){e.preventDefault();startTimer();});
+$("stopNextTimer").addEventListener("click",function(e){e.preventDefault();stopAndStartNext();});
+$("resetTimer").addEventListener("click",function(e){e.preventDefault();resetTimer();});
+$("courseZr").addEventListener("change",function(){
+  activeZr=Number(this.value)||0;
+  coursePoint=1;timerElapsed=0;timerRunning=false;
+  if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
+  renderCourse();save();
+});
 load();renderAll();if($("newZrName"))$("newZrName").value="ZR "+nextLocalZRNumber();
 })();
 </script>
 
-<script id="chrono-v46-repair">
-(function(){
-  function wireChronoButtons(){
-    var start=document.getElementById("startTimer");
-    var stop=document.getElementById("stopNextTimer");
-    var reset=document.getElementById("resetTimer");
 
-    if(start && !start.dataset.wired){
-      start.dataset.wired="1";
-      start.addEventListener("click",function(e){
-        e.preventDefault();
-        e.stopPropagation();
-        if(typeof timerRunning!=="undefined" && timerRunning){
-          if(typeof stopTimer==="function") stopTimer();
-        }else{
-          if(typeof startTimer==="function") startTimer();
-        }
-        if(typeof renderCourse==="function") renderCourse();
-      });
-    }
-
-    if(stop && !stop.dataset.wired){
-      stop.dataset.wired="1";
-      stop.addEventListener("click",function(e){
-        e.preventDefault();
-        e.stopPropagation();
-        if(typeof stopNextTimer==="function"){
-          stopNextTimer();
-        }else if(typeof stopTimer==="function"){
-          stopTimer();
-        }
-      });
-    }
-
-    if(reset && !reset.dataset.wired){
-      reset.dataset.wired="1";
-      reset.addEventListener("click",function(e){
-        e.preventDefault();
-        e.stopPropagation();
-        if(typeof resetTimer==="function") resetTimer();
-      });
-    }
-  }
-
-  if(document.readyState==="loading"){
-    document.addEventListener("DOMContentLoaded",wireChronoButtons);
-  }else{
-    wireChronoButtons();
-  }
-  window.addEventListener("load",wireChronoButtons);
-})();
-</script>
 
 </body>
 </html>
