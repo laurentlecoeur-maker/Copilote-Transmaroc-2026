@@ -157,17 +157,18 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px
     </div>
   </div>
 
+  <div class="courseActions">
+    <button type="button" id="startTimer" class="btnStart">▶ DÉMARRER LE CHRONO</button>
+    <button type="button" id="stopNextTimer" class="btnStop" style="display:none">■ ARRÊTER / SUIVANT</button>
+    <button type="button" id="resetTimer" class="btnReset">↻ RÉINITIALISER</button>
+  </div>
+
   <div class="segmentPanel">
     <div class="segmentTitle">TEMPS PAR TRONÇON</div>
     <div class="segmentHeader"><span>#</span><span>Temps cible</span><span>Temps réel</span><span>Écart (avance/retard)</span></div>
     <div id="segmentTimes"></div>
   </div>
 
-  <div class="courseActions">
-    <button id="startTimer" class="btnStart">▶ DÉMARRER LE CHRONO</button>
-    <button id="stopNextTimer" class="btnStop">■ ARRÊTER / SUIVANT</button>
-    <button id="resetTimer" class="btnReset">↻ RÉINITIALISER</button>
-  </div>
 </section>
 
 
@@ -214,13 +215,21 @@ function startZrTimer(){
   if($("zrEndTime"))$("zrEndTime").textContent="—";
 }
 function stopZrTimer(){
-  if(!zrTimerRunning)return;
-  zrElapsed=Math.max(0,(Date.now()-zrTimerStart)/1000);
+  var now=Date.now();
+  if(zrTimerRunning){
+    zrElapsed=Math.max(0,(now-zrTimerStart)/1000);
+  }
   zrTimerRunning=false;
-  zrEndTime=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  zrEndTime=new Date(now).toLocaleTimeString("fr-FR",{
+    hour:"2-digit",minute:"2-digit",second:"2-digit"
+  });
+
   var ez=zrs[Number($("courseZr").value)];
-  if(ez) ez.actualEnd=zrEndTime;
-  if($("zrEndTime"))$("zrEndTime").textContent=zrEndTime;
+  if(ez){
+    ez.actualEnd=zrEndTime;
+    ez.actualDuration=Math.round(zrElapsed);
+  }
+  if($("zrEndTime")) $("zrEndTime").textContent=zrEndTime;
   save();
 }
 function getElapsed(){
@@ -341,9 +350,13 @@ function renderSegmentTimes(z,rs){
   var el=$("segmentTimes"); if(!el)return;
   var latest=getLatestHistory(z);
   if(!rs.length){el.innerHTML="";return;}
+  var live=timerRunning?getElapsed():0;
   el.innerHTML=rs.map(function(x){
-    var h=latest[x.i], real=h?Number(h.real)||0:null, delta=h?Number(h.delta)||0:null;
-    var current=x.i===coursePoint, dc=delta===null?"":(delta<0?"advance":delta>0?"delay":"");
+    var h=latest[x.i], real=h?Number(h.real)||0:null;
+    if(timerRunning && x.i===coursePoint) real=live;
+    var delta=real===null?null:real-Number(x.t||0);
+    var current=x.i===coursePoint;
+    var dc=delta===null?"":(delta<0?"advance":delta>0?"delay":"");
     var dt=delta===null?"—":signedFmt(delta)+" "+(delta<0?"(avance)":delta>0?"(retard)":"(à l'heure)");
     return '<div class="'+(current?"current ":"")+'"><span>'+(current?"▶ ":"")+x.i+'</span><span>'+short(x.t)+'</span><span>'+(real===null?"—":short(real))+'</span><span class="'+dc+'">'+dt+'</span></div>';
   }).join("");
@@ -375,6 +388,14 @@ function renderCourse(){
   else coursePoint=1;
   var r=rs.length?rs[coursePoint-1]:null;
 
+  /* Toujours afficher les commandes au chargement de la ZR active.
+     Si un chrono tourne, seul le bouton Démarrer est masqué. */
+  if($("startTimer")){
+    $("startTimer").style.display=timerRunning?"none":"block";
+    $("startTimer").textContent="▶ DÉMARRER LE CHRONO";
+  }
+  if($("stopNextTimer")) $("stopNextTimer").style.display=timerRunning?"block":"none";
+
   renderSegmentTimes(z,rs);
   updateZrDelta(z,rs);
 
@@ -388,8 +409,8 @@ function renderCourse(){
 
   if($("zrStartTime"))$("zrStartTime").textContent=(z&&z.actualStart)||"—";
   if($("zrEndTime"))$("zrEndTime").textContent=(z&&z.actualEnd)||"—";
-  $("pointNo").textContent=rs.length?coursePoint:"—";
-  $("targetDist").textContent=r?r.d.toFixed(2)+" km":"—";
+  if($("pointNo"))$("pointNo").textContent=rs.length?coursePoint:"—";
+  if($("targetDist"))$("targetDist").textContent=r?r.d.toFixed(2)+" km":"—";
   
   
 
@@ -403,8 +424,8 @@ function renderCourse(){
   
 
   updateZrTimerUI();
-  $("courseNote").textContent=r?(r.note||""):(rs.length?"":"Définis d'abord les tronçons dans l'onglet PRÉPARATION.");
-  if(!timerRunning)$("timerDisplay").textContent=short(timerElapsed);
+  if($("courseNote"))$("courseNote").textContent=r?(r.note||""):(rs.length?"":"Définis d'abord les tronçons dans l'onglet PRÉPARATION.");
+  if($("timerDisplay")&&!timerRunning)$("timerDisplay").textContent=short(timerElapsed);
   calcCourse();
 
   var zrTargetTotal=0,zrRealTotal=0,zrCompleted=0;
@@ -431,63 +452,95 @@ function getLatestHistory(z){
   return latest;
 }
 function calcCourse(){
-  var idx=Number($("courseZr").value),z=zrs[idx],rs=rows(z),r=rs[coursePoint-1];
-
-  if(!r){
-    $("courseDelta").textContent="—";
-    $("courseDelta").textContent="—";
-    $("courseStatus").textContent="Prêt à démarrer";
+  var sel=$("courseZr");
+  if(!sel)return;
+  var idx=Number(sel.value),z=zrs[idx],rs=rows(z),r=rs[coursePoint-1];
+  if(!z||!r){
+    if($("zrDelta"))$("zrDelta").textContent="ÉCART ZR : —";
     return;
   }
 
-  var real=timerRunning?getElapsed():timerElapsed;
   var latest=getLatestHistory(z);
+  var real=timerRunning?getElapsed():(latest[coursePoint]?Number(latest[coursePoint].real)||0:timerElapsed);
 
-  // Cumul réel : tronçons précédents enregistrés + courant.
-  // Si le courant est arrêté, son enregistrement est déjà la valeur finale.
+  var targetTotal=0, realTotal=0, completed=0;
+  rs.forEach(function(x){
+    targetTotal+=Number(x.t)||0;
+    if(latest[x.i]){
+      realTotal+=Number(latest[x.i].real)||0;
+      completed++;
+    }
+  });
+
+  if(timerRunning) realTotal+=Math.max(0,real);
+
+  var targetCum=0;
+  for(var j=1;j<=coursePoint;j++) targetCum+=Number(rs[j-1].t)||0;
   var previousReal=0;
-  for(var j=1;j<coursePoint;j++){
-    if(latest[j]) previousReal+=Number(latest[j].real)||0;
+  for(var k=1;k<coursePoint;k++) if(latest[k]) previousReal+=Number(latest[k].real)||0;
+  var cumDelta=previousReal+Math.max(0,real)-targetCum;
+
+  if($("zrDelta"))$("zrDelta").textContent="ÉCART ZR : "+signedFmt(cumDelta);
+
+  if($("zrTargetResult"))$("zrTargetResult").textContent=fmt(targetTotal);
+  if($("zrRealResult")){
+    if(completed===rs.length && !timerRunning) $("zrRealResult").textContent=fmt(realTotal);
+    else if(timerRunning) $("zrRealResult").textContent=fmt(realTotal);
+    else $("zrRealResult").textContent="—";
   }
-
-  var currentReal=timerRunning ? Math.max(0,real)
-                               : (latest[coursePoint] ? Number(latest[coursePoint].real)||0 : Math.max(0,real));
-  var currentCum=previousReal+currentReal;
-  var cumDelta=currentCum-r.ct;
-  var segDelta=real-r.t;
-
-  $("courseDelta").textContent=real>0?deltaFmt(segDelta):"—";
-
-  
-  
-
-  if(real<=0 && previousReal<=0){
-    $("courseStatus").textContent="Prêt à démarrer";
-  }else if(segDelta>0){
-    $("courseStatus").textContent="RETARD SUR LE TRONÇON";
-  }else if(segDelta<0){
-    $("courseStatus").textContent="AVANCE SUR LE TRONÇON";
-  }else{
-    $("courseStatus").textContent="À L'HEURE SUR LE TRONÇON";
+  if($("zrResultDelta")){
+    if(timerRunning || completed===rs.length) $("zrResultDelta").textContent=signedFmt(realTotal-targetTotal);
+    else $("zrResultDelta").textContent="—";
   }
-
+  if($("zrResultStatus")){
+    var d=realTotal-targetTotal;
+    $("zrResultStatus").textContent=(timerRunning||completed===rs.length)?(d<0?"AVANCE":d>0?"RETARD":"À L'HEURE"):"";
+  }
 }
 function updateTimerUI(){
-var e=getElapsed();
-$("timerDisplay").textContent=short(e);
-updateZrTimerUI();
-renderCourse();
-calcCourse();
+  var e=timerRunning?getElapsed():Math.max(0,Number(timerElapsed)||0);
+  if($("timerDisplay"))$("timerDisplay").textContent=short(e);
+  if($("zrTimerDisplay"))$("zrTimerDisplay").textContent=short(getZrElapsed());
+  if(typeof renderSegmentTimes==="function"){
+    var z=zrs[Number($("courseZr").value)];
+    if(z) renderSegmentTimes(z,rows(z));
+  }
+  if(typeof updateZrDelta==="function"){
+    var z2=zrs[Number($("courseZr").value)];
+    if(z2) updateZrDelta(z2,rows(z2));
+  }
 }
 function startTimer(){
-if(timerRunning)return;
-var z=zrs[Number($("courseZr").value)],r=rows(z)[coursePoint-1];
-if(!r){return}
-timerRunning=true;timerStart=Date.now()-timerElapsed*1000;
-if(coursePoint===1 && !zrTimerRunning && zrElapsed===0)startZrTimer();
-$("startTimer").style.display="none";$("stopNextTimer").style.display="block";
+  var zi=Number($("courseZr").value);
+  if(!Number.isInteger(zi) || !zrs[zi]) zi=activeZr;
+  var z=zrs[zi];
+  if(!z || !Array.isArray(z.segs) || z.segs.length===0) return;
+  if(timerRunning) return;
 
-timerInterval=setInterval(updateTimerUI,200);updateTimerUI();
+  var r=rows(z)[coursePoint-1];
+  if(!r) return;
+
+  // Start the whole-ZR clock once, then start the current segment clock.
+  if(!zrTimerRunning && !zrElapsed){
+    startZrTimer();
+  }else if(!zrTimerRunning && zrElapsed===0){
+    startZrTimer();
+  }
+
+  timerStart=Date.now()-Math.max(0,Number(timerElapsed)||0)*1000;
+  timerRunning=true;
+
+  if(timerInterval) clearInterval(timerInterval);
+  timerInterval=setInterval(function(){
+    timerElapsed=Math.max(0,(Date.now()-timerStart)/1000);
+    updateTimerUI();
+    updateZrTimerUI();
+  },200);
+
+  $("startTimer").style.display="none";
+  $("stopNextTimer").style.display="block";
+  updateTimerUI();
+  updateZrTimerUI();
 }
 function stopTimer(saveIt){
 if(!timerRunning)return;
@@ -500,53 +553,139 @@ if(saveIt) saveCourseTime(timerElapsed,"chrono");
 save();
 }
 function stopAndStartNext(){
-if(!timerRunning)return;
-var z=zrs[Number($("courseZr").value)];
-if(!z)return;
-var elapsed=getElapsed();
-var rs=rows(z);
-var currentRow=rs[coursePoint-1];
-if(currentRow) saveCourseTime(elapsed,"chrono");
-if(coursePoint<z.segs.length){
-coursePoint++;
-timerElapsed=0;
+  var z=current();
+  if(!z || !z.segs || !z.segs.length) return false;
+  if(!timerRunning) return false;
 
-timerRunning=true;
-timerStart=Date.now();
-$("startTimer").style.display="none";
-$("stopNextTimer").style.display="block";
-$("startTimer").textContent="↻ REFAIRE LE CHRONO";
-save();
-renderCourse();
-}else{
-timerElapsed=elapsed;
-timerRunning=false;
-stopZrTimer();
-clearInterval(timerInterval);timerInterval=null;
+  var now=Date.now();
 
-$("startTimer").style.display="block";
-$("stopNextTimer").style.display="none";
-$("startTimer").textContent="✓ ZR TERMINÉE";
-updateTimerUI();
-save();
-}
+  /* Figer le tronçon courant. */
+  timerElapsed=Math.max(0,(now-timerStart)/1000);
+
+  /* Figer la ZR au même instant. */
+  if(zrTimerRunning){
+    zrElapsed=Math.max(0,(now-zrTimerStart)/1000);
+  }
+
+  var idx=Math.max(0,coursePoint-1);
+  var seg=z.segs[idx];
+  if(!seg) return false;
+
+  /* Enregistrer le résultat dans l'historique utilisé par le tableau,
+     le résultat ZR et les écarts. */
+  z.history=z.history||[];
+  z.history.push({
+    point:coursePoint,
+    target:Number(rows(z)[idx].t)||0,
+    real:Math.round(timerElapsed),
+    delta:Math.round(timerElapsed-(Number(rows(z)[idx].t)||0)),
+    source:"chrono"
+  });
+
+  /* Arrêt réel du chrono du tronçon. */
+  timerRunning=false;
+  if(timerInterval){
+    clearInterval(timerInterval);
+    timerInterval=null;
+  }
+
+  /* Dernier tronçon : arrêt définitif de la ZR. */
+  if(idx >= z.segs.length-1){
+    zrTimerRunning=false;
+    timerRunning=false;
+    zrEndTime=new Date(now).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+    z.realEnd=zrEndTime;
+    z.actualEnd=zrEndTime;
+    z.realStart=zrStartTime;
+    z.actualStart=zrStartTime;
+
+    /* Temps réel ZR = somme des temps réels enregistrés. */
+    var realZr=0;
+    (z.history||[]).forEach(function(h){
+      if(h && Number.isFinite(Number(h.real))) realZr+=Number(h.real);
+    });
+    z.real=realZr;
+    z.realSec=realZr;
+
+    /* Temps cible ZR = somme des temps cibles. */
+    var targetZr=0;
+    (z.segs||[]).forEach(function(s){
+      var dist=Number(s.d),speed=Number(s.s);
+      if(Number.isFinite(dist)&&Number.isFinite(speed)&&speed>0){
+        targetZr+=(dist/speed)*3600;
+      }
+    });
+    z.targetSec=targetZr;
+    z.delta=realZr-targetZr;
+    z.deltaSec=z.delta;
+    z.zrComplete=true;
+
+    updateTimerUI();
+    save();
+    renderAll();
+
+    /* Affichage final direct : aucun autre rendu ne peut effacer ces valeurs. */
+    if($("zrTargetResult"))$("zrTargetResult").textContent=fmt(targetZr);
+    if($("zrRealResult"))$("zrRealResult").textContent=fmt(realZr);
+    if($("zrResultDelta"))$("zrResultDelta").textContent=signedFmt(realZr-targetZr);
+    if($("zrResultStatus")){
+      var d=realZr-targetZr;
+      $("zrResultStatus").textContent=d<0?"AVANCE":d>0?"RETARD":"À L'HEURE";
+    }
+    if($("zrEndTime"))$("zrEndTime").textContent=zrEndTime;
+    return false;
+  }
+
+  /* Tronçon suivant : nouveau chrono de tronçon, même chrono ZR. */
+  coursePoint=idx+2;
+  timerElapsed=0;
+  timerStart=now;
+  timerRunning=true;
+
+  timerInterval=setInterval(function(){
+    if(!timerRunning) return;
+    timerElapsed=Math.max(0,(Date.now()-timerStart)/1000);
+    if(zrTimerRunning){
+      zrElapsed=Math.max(0,(Date.now()-zrTimerStart)/1000);
+    }
+    updateTimerUI();
+  },250);
+
+  updateTimerUI();
+  save();
+  renderAll();
+  return true;
 }
 function resetTimer(){
   timerRunning=false;
   if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
+  timerStart=0;
   timerElapsed=0;
+
   zrTimerRunning=false;
+  zrTimerStart=0;
   zrElapsed=0;
   zrStartTime="";
   zrEndTime="";
+
   var z=zrs[Number($("courseZr").value)];
-  if(z){delete z.actualStart;delete z.actualEnd;z.history=[];}
+  if(z){
+    delete z.actualStart;
+    delete z.actualEnd;
+    delete z.actualDuration;
+    z.history=[];
+  }
+
   coursePoint=1;
   $("startTimer").style.display="block";
-  $("stopNextTimer").style.display="none";
+  $("stopNextTimer").style.display="block";
   $("startTimer").textContent="▶ DÉMARRER LE CHRONO";
+  if($("zrStartTime")) $("zrStartTime").textContent="—";
+  if($("zrEndTime")) $("zrEndTime").textContent="—";
   updateTimerUI();
+  updateZrTimerUI();
   save();
+  renderCourse();
 }
 function saveCourseTime(real,source){
 var z=zrs[Number($("courseZr").value)],r=rows(z)[coursePoint-1];
@@ -578,7 +717,7 @@ var name=rawName||("ZR "+(zrs.length+1));
 if(match){
   var number=String(Number(match[1]));
   var exists=zrs.some(function(z){
-    var m=String(z.name).trim().match(/^ZR\s*(\d+)$/i);
+    var m=String(z.name||"").trim().match(/^ZR\s*(\d+)$/i);
     return m && String(Number(m[1]))===number;
   });
   if(exists){
@@ -588,31 +727,62 @@ if(match){
   }
   name="ZR "+number;
 }
-zrs.push({id:"zr_"+Date.now()+"_"+Math.random().toString(36).slice(2),name:name,start:start,segs:[],history:[]});
+
+zrs.push({
+  id:"zr_"+Date.now()+"_"+Math.random().toString(36).slice(2),
+  name:name,
+  start:start,
+  segs:[],
+  history:[]
+});
 activeZr=zrs.length-1;
-coursePoint=1;zrTimerRunning=false;zrElapsed=0;zrTimerStart=0;
+coursePoint=1;
+zrTimerRunning=false;
+zrElapsed=0;
+zrTimerStart=0;
 $("zrMsg").textContent="✓ "+name+" créée";
 $("newZrName").value="ZR "+nextLocalZRNumber();
-save();renderAll();
+save();
+renderAll();
 });
-$("addSeg").addEventListener("click",function(){
-var z=current(),d=num($("segDist").value),s=num($("segSpeed").value),note=$("segNote").value.trim();
-if(!z){$("segMsg").textContent="Crée d'abord une ZR.";return}
-if(!Number.isFinite(d)||d<=0||!Number.isFinite(s)||s<=0){$("segMsg").textContent="Distance et moyenne invalides.";return}
-z.segs.push({d:d,s:s,note:note});$("segDist").value="";$("segSpeed").value="";$("segNote").value="";$("segMsg").textContent="✓ Tronçon ajouté";
-save();renderAll();$("segDist").focus();
+
+$("addSeg").addEventListener("click",function(e){
+if(e){e.preventDefault();e.stopPropagation();}
+var z=current();
+var d=num($("segDist").value);
+var s=num($("segSpeed").value);
+var note=$("segNote").value.trim();
+
+if(!z){
+  $("segMsg").textContent="Crée d'abord une ZR.";
+  return;
+}
+if(!Number.isFinite(d)||d<=0||!Number.isFinite(s)||s<=0){
+  $("segMsg").textContent="Distance et moyenne invalides.";
+  return;
+}
+
+z.segs=z.segs||[];
+z.segs.push({d:d,s:s,note:note});
+$("segDist").value="";
+$("segSpeed").value="";
+$("segNote").value="";
+$("segMsg").textContent="✓ Tronçon ajouté";
+save();
+renderAll();
+$("segDist").focus();
 });
 $("zrSelect").addEventListener("change",function(){activeZr=Number(this.value);coursePoint=1;save();renderAll()});
 $("tabPrep").addEventListener("click",function(){tab("prep")});
 $("tabCourse").addEventListener("click",function(){tab("course")});
 $("tabDelta").addEventListener("click",function(){tab("delta")});
-$("courseToPrep").addEventListener("click",function(){tab("prep")});
+if($("courseToPrep"))$("courseToPrep").addEventListener("click",function(){tab("prep")});
 
-$("prevPoint").addEventListener("click",function(){
+if($("prevPoint"))$("prevPoint").addEventListener("click",function(){
 if(timerRunning)stopTimer(false);
 if(coursePoint>1){coursePoint--;timerElapsed=0;$("startTimer").textContent="▶ DÉMARRER LE CHRONO";$("startTimer").style.display="block";$("stopNextTimer").style.display="none";updateManualDisplay();save();renderCourse()}
 });
-$("resetCourse").addEventListener("click",function(){
+if($("resetCourse"))$("resetCourse").addEventListener("click",function(){
 if(timerRunning)stopTimer(false);
 var z=zrs[Number($("courseZr").value)];if(z)z.history=[];
 coursePoint=1;timerElapsed=0;
@@ -721,14 +891,22 @@ $("deleteDayBtn").addEventListener("click",function(){
   var m=$("dayMsg");if(m)m.textContent="✓ "+deleted+" supprimée";
 });
 
-$("startTimer").addEventListener("click",function(e){
-  e.preventDefault();
+/* Bouton chrono : liaison directe, plus fiable sur mobile/tactile. */
+$("startTimer").onclick=function(e){
+  if(e){e.preventDefault();e.stopPropagation();}
   startTimer();
-});
-$("stopNextTimer").addEventListener("click",function(e){
-  e.preventDefault();
+  return false;
+};
+$("startTimer").ontouchend=function(e){
+  if(e){e.preventDefault();e.stopPropagation();}
+  startTimer();
+  return false;
+};
+$("stopNextTimer").onclick=function(e){
+  if(e){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();}
   stopAndStartNext();
-});
+  return false;
+};
 $("resetTimer").addEventListener("click",function(e){e.preventDefault();resetTimer();});
 $("courseZr").addEventListener("change",function(){
   activeZr=Number(this.value)||0;
